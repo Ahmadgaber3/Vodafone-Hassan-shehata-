@@ -10,8 +10,8 @@
             --success: linear-gradient(135deg, #16a34a, #15803d);
             --warning: linear-gradient(135deg, #d97706, #b45309);
             --danger: linear-gradient(135deg, #dc2626, #b91c1c);
-            --bg: #e2e8f0; /* خلفية داكنة درجة عشان تبرز الكروت */
-            --card-bg: #ffffff; /* الكروت بيضاء تماماً ومفصولة */
+            --bg: #e2e8f0;
+            --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-sub: #64748b;
             --radius: 12px;
@@ -27,16 +27,14 @@
         header h1 { font-size: 15px; font-weight: 800; color: #1e3a8a; }
         
         .search-container { margin-bottom: 8px; }
-        .search-input { width: 100%; padding: 8px 12px; border-radius: var(--radius); border: 1px solid #cbd5e1; font-size: 12px; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .search-input { width: 100%; padding: 8px 12px; border-radius: var(--radius); border: 1px solid #cbd5e1; font-size: 12px; outline: none; }
 
-        /* أزرار التجديد التلقائي الجماعي */
         .renew-days-bar { display: flex; gap: 4px; margin-bottom: 8px; }
-        .renew-day-btn { flex: 1; background: #0f172a; color: white; border: none; padding: 8px 4px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; transition: background 0.2s; text-align: center; }
+        .renew-day-btn { flex: 1; background: #0f172a; color: white; border: none; padding: 8px 4px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
         .renew-day-btn:active { transform: scale(0.97); }
 
-        /* نظام التبويب الخماسي الكامل فوق */
-        .tabs { display: flex; background: #cbd5e1; padding: 2px; border-radius: var(--radius); margin-bottom: 8px; gap: 2px; overflow-x: auto; }
-        .tab-btn { flex: 1; padding: 6px 4px; border: none; background: none; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-main); border-radius: 10px; display: flex; flex-direction: column; align-items: center; white-space: nowrap; }
+        .tabs { display: flex; background: #cbd5e1; padding: 2px; border-radius: var(--radius); margin-bottom: 8px; gap: 2px; }
+        .tab-btn { flex: 1; padding: 6px 4px; border: none; background: none; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-main); border-radius: 10px; display: flex; flex-direction: column; align-items: center; }
         .tab-btn span.count { font-size: 9px; background: #f1f5f9; padding: 1px 5px; border-radius: 20px; color: var(--text-main); margin-top: 2px; }
         
         .tab-btn.active { background: #2563eb; color: white; }
@@ -48,9 +46,8 @@
         .section-content { display: none; }
         .section-content.active { display: block; }
 
-        /* كروت المشتركين بارزة ومفصولة بلون أبيض */
         .subscribers-list { display: flex; flex-direction: column; gap: 6px; }
-        .user-card { background: var(--card-bg); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); position: relative; overflow: hidden; }
+        .user-card { background: var(--card-bg); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         
         .user-card::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 5px; background: #cbd5e1; }
         .user-card.fully-paid::before { background: var(--success); }
@@ -58,7 +55,6 @@
         .user-card.unpaid::before { background: var(--danger); }
         
         .user-card:active { transform: scale(0.97); }
-
         .user-info-main h3 { font-size: 13px; font-weight: 700; color: #1e293b; }
         .countdown-text { font-size: 10px; color: var(--text-sub); margin-top: 2px; display: block; }
         
@@ -67,7 +63,6 @@
         .partial-paid .status-badge { background: var(--warning); }
         .unpaid .status-badge { background: var(--danger); }
 
-        /* 🚪 الصفحة المنبثقة المنفصلة (Modal) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: flex-end; z-index: 999; }
         .modal-card { background: #ffffff; width: 100%; max-width: 430px; border-radius: 20px 20px 0 0; padding: 16px; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -97,8 +92,7 @@
         .timeline-item { position: relative; padding-right: 12px; margin-bottom: 4px; color: #475569; font-size: 10px; }
         .timeline-item::before { content: ''; position: absolute; right: 2px; top: 4px; width: 5px; height: 5px; background: #cbd5e1; border-radius: 50%; }
 
-        /* 🔒 قسم الخزنة النظيف والمستقل كمحتوى */
-        .vault-view { background: #0f172a; color: white; padding: 14px; border-radius: var(--radius); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .vault-view { background: #0f172a; color: white; padding: 14px; border-radius: var(--radius); }
         .vault-auth { display: flex; gap: 6px; justify-content: center; padding: 20px 0; }
         .vault-input { padding: 8px; border-radius: 8px; border: none; width: 140px; text-align: center; font-size: 13px; outline: none; }
         .vault-btn { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
@@ -109,8 +103,8 @@
         .vault-card-item strong { font-size: 16px; color: #38bdf8; }
         
         .eye-btn { width: 100%; background: #334155; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
-        
         .no-results { text-align: center; padding: 20px; color: var(--text-sub); background: white; border-radius: var(--radius); }
+        .loading { text-align: center; padding: 20px; font-weight: bold; color: #2563eb; background: white; border-radius: var(--radius); }
     </style>
 </head>
 <body>
@@ -121,7 +115,6 @@
             <h1>نظام إدارة المشتركين والاتصالات</h1>
         </header>
 
-        <!-- أزرار التجديد التلقائي الجماعي -->
         <div class="renew-days-bar">
             <button class="renew-day-btn" onclick="autoRenewByDay(8)">🔄 تجديد مشتركين يوم 8</button>
             <button class="renew-day-btn" onclick="autoRenewByDay(18)">🔄 تجديد مشتركين يوم 18</button>
@@ -132,7 +125,6 @@
             <input type="text" id="searchInput" class="search-input" placeholder="ابحث باسم العميل..." oninput="handleSearch()">
         </div>
 
-        <!-- الأقسام الكاملة + الخزنة السرية فوق -->
         <div class="tabs">
             <button class="tab-btn active" id="tab-all" onclick="switchTab('all')">الكل <span class="count" id="count-all">0</span></button>
             <button class="tab-btn" id="tab-unpaid" onclick="switchTab('unpaid')">لم يدفع <span class="count" id="count-unpaid">0</span></button>
@@ -141,12 +133,12 @@
             <button class="tab-btn vault-tab" id="tab-vault" onclick="switchTab('vault')">🔒 الخزنة</button>
         </div>
 
-        <!-- قسم عرض القوائم والمشتركين -->
         <div id="list-section" class="section-content active">
-            <div id="subscribersList" class="subscribers-list"></div>
+            <div id="subscribersList" class="subscribers-list">
+                <div class="loading">جاري تحميل بيانات الـ 100 مشترك من جوجل شيت... 🔄</div>
+            </div>
         </div>
 
-        <!-- قسم الخزنة النظيف تماماً بدون أي تفاصيل مشتتة -->
         <div id="vault-section" class="section-content">
             <div class="vault-view">
                 <div class="vault-auth" id="vaultAuthBox">
@@ -175,7 +167,6 @@
     </div>
 </div>
 
-<!-- 🚪 شاشة التفاصيل المنبثقة التحتية (Bottom Sheet Modal) -->
 <div class="modal-overlay" id="detailsModal" onclick="closeModalOutside(event)">
     <div class="modal-card">
         <div class="modal-header">
@@ -188,7 +179,7 @@
             <div class="detail-item"><span>💵 باقة الشهر الحالي</span><strong id="m-price">0 ج</strong></div>
             <div class="detail-item"><span>🛑 ديون قديمة متأخرة</span><strong id="m-debt">0 ج</strong></div>
             <div class="detail-item"><span>✅ تم سداده هذا الشهر</span><strong id="m-paid" style="color: #16a34a;">0 ج</strong></div>
-            <div class="detail-item" style="grid-column: span 2; background: #f1f5f9;"><span>🚨 المتبقي الإجمالي عليه للغلق</span><strong id="m-remaining">0 ج</strong></div>
+            <div class="detail-item" style="grid-column: span 2; background: #f1f5f9;"><span>🚨 مجموع المتبقي النهائي عليه</span><strong id="m-remaining">0 ج</strong></div>
         </div>
 
         <div class="actions-row">
@@ -214,14 +205,37 @@
 </div>
 
 <script>
-    let subscribers = [
-        { id: 1, name: "أحمد محمد علي", phone: "01012345678", renewDay: 8, packagePrice: 150, previousDebt: 0, currentPaid: 150, history: ["تم دفع 150 ج قيمة الباقة كاملة"] },
-        { id: 2, name: "محمود حسن سعيد", phone: "01198765432", renewDay: 28, packagePrice: 200, previousDebt: 50, currentPaid: 0, history: ["مُرحل من الشهر الماضي دين 50 ج"] }, 
-        { id: 3, name: "إبراهيم خالد عبد الله", phone: "01255554444", renewDay: 18, packagePrice: 300, previousDebt: 0, currentPaid: 100, history: ["تم دفع 100 ج دفعة جزئية"] },
-        { id: 4, name: "مصطفى سيد جابر", phone: "01511112222", renewDay: 20, packagePrice: 250, previousDebt: 30, currentPaid: 280, history: ["دفع الدين والباقة بالكامل"] },
-    ];
+    // ⚠️ استبدل الرابط اللي تحت ده برابط الـ Web App URL اللي أخدته من نشر السكريبت في جوجل شيت
+    const SHEET_API_URL = "YOUR_WEB_APP_URL"; 
 
+    let subscribers = [];
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
+
+    function saveToLocalStorage() {
+        localStorage.setItem('subscribers_data', JSON.stringify(subscribers));
+    }
+
+    async function loadData() {
+        const listContainer = document.getElementById('subscribersList');
+        try {
+            const response = await fetch(SHEET_API_URL);
+            const dataFromSheet = await response.json();
+            
+            if (dataFromSheet && dataFromSheet.length > 0) {
+                subscribers = dataFromSheet;
+                saveToLocalStorage();
+            }
+        } catch (error) {
+            const savedData = localStorage.getItem('subscribers_data');
+            if (savedData) {
+                subscribers = JSON.parse(savedData);
+            } else {
+                listContainer.innerHTML = `<div class="no-results" style="color:red;">❌ خطأ في الاتصال بجوجل شيت. تأكد من نشر الرابط بشكل صحيح!</div>`;
+                return;
+            }
+        }
+        render();
+    }
 
     function getSubscriberStatus(sub) {
         const totalRequired = sub.packagePrice + sub.previousDebt;
@@ -244,6 +258,7 @@
 
     function render() {
         const listContainer = document.getElementById('subscribersList');
+        if (subscribers.length === 0) return;
         listContainer.innerHTML = '';
         
         if (currentTab === 'vault') return;
@@ -273,26 +288,26 @@
         updateCounters();
     }
 
-    function autoRenewByDay(dayNumber) {
+    async function autoRenewByDay(dayNumber) {
         const targets = subscribers.filter(s => s.renewDay === dayNumber);
-        if (targets.length === 0) { alert(`لا يوجد مشتركين مسجلين ميعاد تجديدهم يوم ${dayNumber}!`); return; }
-
+        if (targets.length === 0) { alert(`لا يوجد مشتركين ليوم ${dayNumber}`); return; }
         if (!confirm(`هل تريد تجديد الشهر تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
 
-        subscribers = subscribers.map(sub => {
-            if (sub.renewDay === dayNumber) {
-                const { remaining } = getSubscriberStatus(sub);
-                return {
-                    ...sub,
-                    previousDebt: remaining,
-                    currentPaid: 0,
-                    history: [`تجديد تلقائي ليوم ${dayNumber}. تدوير متبقي ${remaining} ج كدين.`]
-                };
-            }
-            return sub;
-        });
-        render();
-        alert(`🚀 تم التجديد وحساب الديون بنجاح!`);
+        document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري تدوير الحسابات في جوجل شيت... 🔄</div>`;
+        
+        try {
+            await fetch(SHEET_API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "renew", day: dayNumber })
+            });
+            alert("🚀 تم التجديد والحفظ الفوري في جوجل شيت!");
+            setTimeout(loadData, 1200); 
+        } catch (e) {
+            alert("حدث خطأ أثناء التجديد!");
+            loadData();
+        }
     }
 
     function openSubscriberModal(id) {
@@ -310,7 +325,7 @@
         document.getElementById('m-pay-btn').setAttribute('onclick', `submitModalPayment(${id})`);
 
         const histContent = document.getElementById('m-history-content');
-        histContent.innerHTML = sub.history.map(h => `<div class="timeline-item">${h}</div>`).join('') || '<div>لا توجد عمليات</div>';
+        histContent.innerHTML = sub.history.map(h => `<div class="timeline-item">${h}</div>`).join('') || '<div>لا توجد عمليات مسجلة</div>';
 
         document.getElementById('m-pay-input').value = ''; document.getElementById('m-calc-box').style.display = 'none';
         document.getElementById('detailsModal').style.display = 'flex'; document.body.classList.add('modal-open');
@@ -325,11 +340,32 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
+    // ⚡ التعديل الاحترافي لسرعة الحفظ الفوري بدون تعليق الزرار
     function submitModalPayment(id) {
-        const input = document.getElementById('m-pay-input'); const amount = parseFloat(input.value);
+        const input = document.getElementById('m-pay-input'); 
+        const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
-        subscribers = subscribers.map(sub => { if (sub.id === id) { return { ...sub, currentPaid: sub.currentPaid + amount, history: [...sub.history, `تم دفع مبلغ ${amount} ج`] }; } return sub; });
-        render(); openSubscriberModal(id);
+
+        // 1. تحديث وحفظ البيانات محلياً في ذاكرة الموبايل فوراً
+        subscribers = subscribers.map(sub => { 
+            if (sub.id === id) { 
+                return { ...sub, currentPaid: sub.currentPaid + amount, history: [...sub.history, `تم دفع مبلغ ${amount} ج`] }; 
+            } 
+            return sub; 
+        });
+        
+        saveToLocalStorage(); // حفظ فوري في الموبايل
+        
+        // 2. ترحيل البيانات لجوجل شيت في الخلفية من غير ما يعلق الشاشة
+        fetch(SHEET_API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "pay", id: id, amount: amount })
+        });
+
+        closeModal();
+        render(); // إعادة عرض القائمة بالبيانات الجديدة فوراً
     }
 
     function unlockVault() {
@@ -367,6 +403,7 @@
         if(tabName === 'vault') {
             document.getElementById('list-section').classList.remove('active');
             document.getElementById('vault-section').classList.add('active');
+            calculateVaultData();
         } else {
             document.getElementById('vault-section').classList.remove('active');
             document.getElementById('list-section').classList.add('active');
@@ -374,7 +411,9 @@
         }
     }
 
-    handleSearch();
+    function handleSearch() { searchQuery = document.getElementById('searchInput').value; render(); }
+
+    loadData();
 </script>
 </body>
 </html>
