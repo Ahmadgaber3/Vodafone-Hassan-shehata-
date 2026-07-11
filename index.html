@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين الاحترافية</title>
+    <title>لوحة إدارة المشتركين الاحترافية المربوطة</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -20,7 +20,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg); color: var(--text-main); padding: 8px; font-size: 12px; position: relative; min-height: 100vh; }
         
-        /* تأثير الغموش الكامل للخلفية */
         body.modal-open .main-content { filter: blur(6px); pointer-events: none; }
         .container { max-width: 430px; margin: 0 auto; }
         
@@ -64,38 +63,20 @@
         .partial-paid .status-badge { background: var(--warning); }
         .unpaid .status-badge { background: var(--danger); }
 
-        /* ✨ شاشة التفاصيل في السنتر بالظبط وبأعلى دقة */
         .modal-overlay { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(15, 23, 42, 0.6); 
-            backdrop-filter: blur(5px); 
-            display: none; /* بيتحكم فيه الـ JS */
-            justify-content: center; 
-            align-items: center; 
-            padding: 16px;
-            z-index: 9999; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); 
+            display: none; justify-content: center; align-items: center; 
+            padding: 16px; z-index: 9999; 
         }
         
         .modal-card { 
-            background: #ffffff; 
-            width: 100%; 
-            max-width: 380px; 
-            border-radius: 16px; 
-            padding: 16px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
-            animation: fadeInCenter 0.2s ease-out;
-            position: relative;
+            background: #ffffff; width: 100%; max-width: 380px; 
+            border-radius: 16px; padding: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+            animation: fadeInCenter 0.2s ease-out; position: relative;
         }
         
-        @keyframes fadeInCenter { 
-            from { transform: scale(0.9); opacity: 0; } 
-            to { transform: scale(1); opacity: 1; } 
-        }
-
+        @keyframes fadeInCenter { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
         .modal-header h2 { font-size: 14px; font-weight: 800; }
         .close-modal-btn { background: #f1f5f9; border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; font-size: 14px; }
@@ -115,7 +96,6 @@
         .submit-pay-btn { background: #2563eb; color: white; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px; }
 
         .cash-calc-box { background: #fff7ed; padding: 6px; border-radius: 8px; border: 1px solid #ffedd5; display: flex; justify-content: space-between; align-items: center; font-size: 10px; margin-bottom: 8px; }
-
         .history-box { background: #f8fafc; padding: 6px 8px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px; max-height: 80px; overflow-y: auto; }
         .history-title { font-weight: 700; color: var(--text-sub); margin-bottom: 4px; }
         .timeline-item { position: relative; padding-right: 12px; margin-bottom: 4px; color: #475569; font-size: 10px; }
@@ -164,7 +144,7 @@
 
         <div id="list-section" class="section-content active">
             <div id="subscribersList" class="subscribers-list">
-                <div class="loading">جاري تحميل بيانات الـ 100 مشترك من جوجل شيت... 🔄</div>
+                <div class="loading">جاري مزامنة الأسماء الحية بالملي من جوجل شيت... 🔄</div>
             </div>
         </div>
 
@@ -196,7 +176,6 @@
     </div>
 </div>
 
-<!-- شاشة التفاصيل (الـ Modal) المصلحة -->
 <div class="modal-overlay" id="detailsModal" onclick="closeModalOutside(event)">
     <div class="modal-card">
         <div class="modal-header">
@@ -235,15 +214,10 @@
 </div>
 
 <script>
-    // ⚠️ استبدل الرابط اللي تحت ده برابط الـ Web App URL بتاع جوجل شيت
-    const SHEET_API_URL = "YOUR_WEB_APP_URL"; 
+    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbz_RxJWUV40yWnWDDnbPGy2EgcoQ4SCqcUwIPnqqRMAx5mQ2ywvFlVxvSQ9HQYNC8qh/exec"; 
 
     let subscribers = [];
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
-
-    function saveToLocalStorage() {
-        localStorage.setItem('subscribers_data', JSON.stringify(subscribers));
-    }
 
     async function loadData() {
         const listContainer = document.getElementById('subscribersList');
@@ -252,19 +226,25 @@
             const dataFromSheet = await response.json();
             
             if (dataFromSheet && dataFromSheet.length > 0) {
-                subscribers = dataFromSheet;
-                saveToLocalStorage();
+                // ميكانيزم قراءة العواميد بالترتيب التلقائي لمنع حدوث undefined نهائياً
+                subscribers = dataFromSheet.map((item, index) => {
+                    const vals = Object.values(item);
+                    return {
+                        id: parseInt(vals[0]) || (index + 1), 
+                        name: vals[1] || "اسم غير مسجل",         
+                        phone: vals[2] || "",                 
+                        renewDay: parseInt(vals[3]) || 8,     
+                        packagePrice: parseFloat(vals[4]) || 0, 
+                        previousDebt: parseFloat(vals[5]) || 0, 
+                        currentPaid: parseFloat(vals[6]) || 0,  
+                        history: vals[7] ? (vals[7].toString().startsWith('[') ? JSON.parse(vals[7]) : [vals[7]]) : [] 
+                    };
+                });
+                render();
             }
         } catch (error) {
-            const savedData = localStorage.getItem('subscribers_data');
-            if (savedData) {
-                subscribers = JSON.parse(savedData);
-            } else {
-                listContainer.innerHTML = `<div class="no-results" style="color:red;">❌ خطأ في الاتصال بجوجل شيت. تأكد من نشر الرابط بشكل صحيح!</div>`;
-                return;
-            }
+            listContainer.innerHTML = `<div class="no-results" style="color:red;">❌ خطأ في سحب البيانات الحية. تأكد من إعداد النشر في السكريبت!</div>`;
         }
-        render();
     }
 
     function getSubscriberStatus(sub) {
@@ -298,7 +278,7 @@
         if (currentTab === 'partial') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'partial-paid');
         if (currentTab === 'unpaid') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'unpaid');
 
-        if (searchQuery.trim() !== '') filtered = filtered.filter(s => s.name.includes(searchQuery.trim()));
+        if (searchQuery.trim() !== '') filtered = filtered.filter(s => s.name.toString().includes(searchQuery.trim()));
         if (filtered.length === 0) { listContainer.innerHTML = `<div class="no-results">لا يوجد نتائج للمطابقة.</div>`; return; }
 
         filtered.forEach(sub => {
@@ -319,11 +299,8 @@
     }
 
     async function autoRenewByDay(dayNumber) {
-        const targets = subscribers.filter(s => s.renewDay === dayNumber);
-        if (targets.length === 0) { alert(`لا يوجد مشتركين ليوم ${dayNumber}`); return; }
-        if (!confirm(`هل تريد تجديد الشهر تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
-
-        document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري تدوير الحسابات في جوجل شيت... 🔄</div>`;
+        if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
+        document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري ترحيل الديون وتحديث جوجل شيت... 🔄</div>`;
         
         try {
             await fetch(SHEET_API_URL, {
@@ -332,7 +309,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action: "renew", day: dayNumber })
             });
-            alert("🚀 تم التجديد والحفظ الفوري!");
+            alert("🚀 تم التدوير والترحيل بنجاح داخل جوجل شيت!");
             setTimeout(loadData, 1200); 
         } catch (e) {
             alert("حدث خطأ أثناء التجديد!");
@@ -370,7 +347,6 @@
         document.getElementById('m-pay-input').value = ''; 
         document.getElementById('m-calc-box').style.display = 'none';
         
-        // إظهار الكارت وتفعيل الغموش بشكل آمن وصحيح
         document.getElementById('detailsModal').style.display = 'flex'; 
         document.body.classList.add('modal-open'); 
     }
@@ -380,10 +356,7 @@
         document.body.classList.remove('modal-open'); 
         activeSubId = null; 
     }
-    
-    function closeModalOutside(e) { 
-        if(e.target.id === 'detailsModal') closeModal(); 
-    }
+    function closeModalOutside(e) { if(e.target.id === 'detailsModal') closeModal(); }
 
     function calcModalCashFees() {
         const input = document.getElementById('m-pay-input'); const box = document.getElementById('m-calc-box');
@@ -391,29 +364,25 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
-    function submitModalPayment(id) {
+    async function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
 
-        subscribers = subscribers.map(sub => { 
-            if (sub.id === id) { 
-                return { ...sub, currentPaid: sub.currentPaid + amount, history: [...sub.history, `تم دفع مبلغ ${amount} ج`] }; 
-            } 
-            return sub; 
-        });
+        document.getElementById('m-pay-btn').innerText = "جاري الإرسال...";
         
-        saveToLocalStorage();
-        
-        fetch(SHEET_API_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "pay", id: id, amount: amount })
-        });
-
-        closeModal();
-        render();
+        try {
+            await fetch(SHEET_API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "pay", id: id, amount: amount })
+            });
+            closeModal();
+            setTimeout(loadData, 1000); 
+        } catch (e) {
+            alert("حدث خطأ أثناء إرسال المبلغ لجوجل شيت!");
+        }
     }
 
     function unlockVault() {
