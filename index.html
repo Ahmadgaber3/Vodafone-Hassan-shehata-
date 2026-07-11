@@ -18,8 +18,9 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg); color: var(--text-main); padding: 8px; font-size: 12px; }
+        body { background-color: var(--bg); color: var(--text-main); padding: 8px; font-size: 12px; position: relative; min-height: 100vh; }
         
+        /* تأثير الغموش الكامل للخلفية */
         body.modal-open .main-content { filter: blur(6px); pointer-events: none; }
         .container { max-width: 430px; margin: 0 auto; }
         
@@ -47,7 +48,7 @@
         .section-content.active { display: block; }
 
         .subscribers-list { display: flex; flex-direction: column; gap: 6px; }
-        .user-card { background: var(--card-bg); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        .user-card { background: var(--card-bg); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; overflow: hidden; z-index: 1; }
         
         .user-card::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 5px; background: #cbd5e1; }
         .user-card.fully-paid::before { background: var(--success); }
@@ -63,13 +64,41 @@
         .partial-paid .status-badge { background: var(--warning); }
         .unpaid .status-badge { background: var(--danger); }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: flex-end; z-index: 999; }
-        .modal-card { background: #ffffff; width: 100%; max-width: 430px; border-radius: 20px 20px 0 0; padding: 16px; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        /* ✨ شاشة التفاصيل في السنتر بالظبط وبأعلى دقة */
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(5px); 
+            display: none; /* بيتحكم فيه الـ JS */
+            justify-content: center; 
+            align-items: center; 
+            padding: 16px;
+            z-index: 9999; 
+        }
+        
+        .modal-card { 
+            background: #ffffff; 
+            width: 100%; 
+            max-width: 380px; 
+            border-radius: 16px; 
+            padding: 16px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+            animation: fadeInCenter 0.2s ease-out;
+            position: relative;
+        }
+        
+        @keyframes fadeInCenter { 
+            from { transform: scale(0.9); opacity: 0; } 
+            to { transform: scale(1); opacity: 1; } 
+        }
 
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
         .modal-header h2 { font-size: 14px; font-weight: 800; }
-        .close-modal-btn { background: #f1f5f9; border: none; width: 24px; height: 24px; border-radius: 50%; font-weight: bold; cursor: pointer; color: var(--text-sub); }
+        .close-modal-btn { background: #f1f5f9; border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
         .detail-item { background: #f8fafc; padding: 6px 8px; border-radius: 8px; border: 1px solid #f1f5f9; }
@@ -77,7 +106,7 @@
         .detail-item strong { color: var(--text-main); font-size: 13px; font-weight: 700; }
 
         .actions-row { display: flex; gap: 6px; margin-bottom: 8px; }
-        .action-link { flex: 1; text-decoration: none; text-align: center; padding: 7px; border-radius: 8px; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; color: white; }
+        .action-link { flex: 1; text-decoration: none; text-align: center; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; color: white; }
         .btn-call { background: #16a34a; }
         .btn-whatsapp { background: #25d366; }
 
@@ -167,6 +196,7 @@
     </div>
 </div>
 
+<!-- شاشة التفاصيل (الـ Modal) المصلحة -->
 <div class="modal-overlay" id="detailsModal" onclick="closeModalOutside(event)">
     <div class="modal-card">
         <div class="modal-header">
@@ -205,7 +235,7 @@
 </div>
 
 <script>
-    // ⚠️ استبدل الرابط اللي تحت ده برابط الـ Web App URL اللي أخدته من نشر السكريبت في جوجل شيت
+    // ⚠️ استبدل الرابط اللي تحت ده برابط الـ Web App URL بتاع جوجل شيت
     const SHEET_API_URL = "YOUR_WEB_APP_URL"; 
 
     let subscribers = [];
@@ -302,7 +332,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ action: "renew", day: dayNumber })
             });
-            alert("🚀 تم التجديد والحفظ الفوري في جوجل شيت!");
+            alert("🚀 تم التجديد والحفظ الفوري!");
             setTimeout(loadData, 1200); 
         } catch (e) {
             alert("حدث خطأ أثناء التجديد!");
@@ -311,7 +341,17 @@
     }
 
     function openSubscriberModal(id) {
-        activeSubId = id; const sub = subscribers.find(s => s.id === id); const { remaining } = getSubscriberStatus(sub);
+        activeSubId = id; 
+        const sub = subscribers.find(s => s.id === id); 
+        if(!sub) return;
+        
+        const { remaining } = getSubscriberStatus(sub);
+        
+        let cleanPhone = sub.phone.toString();
+        if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
+            cleanPhone = '0' + cleanPhone;
+        }
+
         document.getElementById('m-name').innerText = sub.name;
         document.getElementById('m-renew-day').innerText = `يوم ${sub.renewDay} في الشهر`;
         document.getElementById('m-price').innerText = sub.packagePrice + " ج";
@@ -320,19 +360,30 @@
         document.getElementById('m-remaining').innerText = remaining + " ج";
         document.getElementById('m-remaining').style.color = remaining > 0 ? '#dc2626' : '#16a34a';
 
-        document.getElementById('m-link-call').setAttribute('href', `tel:${sub.phone}`);
-        document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${sub.phone}?text=${encodeURIComponent('يا غالي حابين نذكرك إن تجديد باقتك يوم ' + sub.renewDay + ' والمتبقي عليك ' + remaining + ' ج')}`);
+        document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
+        document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('يا غالي حابين نذكرك إن تجديد باقتك يوم ' + sub.renewDay + ' والمتبقي عليك ' + remaining + ' ج')}`);
         document.getElementById('m-pay-btn').setAttribute('onclick', `submitModalPayment(${id})`);
 
         const histContent = document.getElementById('m-history-content');
         histContent.innerHTML = sub.history.map(h => `<div class="timeline-item">${h}</div>`).join('') || '<div>لا توجد عمليات مسجلة</div>';
 
-        document.getElementById('m-pay-input').value = ''; document.getElementById('m-calc-box').style.display = 'none';
-        document.getElementById('detailsModal').style.display = 'flex'; document.body.classList.add('modal-open');
+        document.getElementById('m-pay-input').value = ''; 
+        document.getElementById('m-calc-box').style.display = 'none';
+        
+        // إظهار الكارت وتفعيل الغموش بشكل آمن وصحيح
+        document.getElementById('detailsModal').style.display = 'flex'; 
+        document.body.classList.add('modal-open'); 
     }
 
-    function closeModal() { document.getElementById('detailsModal').style.display = 'none'; document.body.classList.remove('modal-open'); activeSubId = null; }
-    function closeModalOutside(e) { if(e.target.id === 'detailsModal') closeModal(); }
+    function closeModal() { 
+        document.getElementById('detailsModal').style.display = 'none'; 
+        document.body.classList.remove('modal-open'); 
+        activeSubId = null; 
+    }
+    
+    function closeModalOutside(e) { 
+        if(e.target.id === 'detailsModal') closeModal(); 
+    }
 
     function calcModalCashFees() {
         const input = document.getElementById('m-pay-input'); const box = document.getElementById('m-calc-box');
@@ -340,13 +391,11 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
-    // ⚡ التعديل الاحترافي لسرعة الحفظ الفوري بدون تعليق الزرار
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
 
-        // 1. تحديث وحفظ البيانات محلياً في ذاكرة الموبايل فوراً
         subscribers = subscribers.map(sub => { 
             if (sub.id === id) { 
                 return { ...sub, currentPaid: sub.currentPaid + amount, history: [...sub.history, `تم دفع مبلغ ${amount} ج`] }; 
@@ -354,9 +403,8 @@
             return sub; 
         });
         
-        saveToLocalStorage(); // حفظ فوري في الموبايل
+        saveToLocalStorage();
         
-        // 2. ترحيل البيانات لجوجل شيت في الخلفية من غير ما يعلق الشاشة
         fetch(SHEET_API_URL, {
             method: "POST",
             mode: "no-cors",
@@ -365,7 +413,7 @@
         });
 
         closeModal();
-        render(); // إعادة عرض القائمة بالبيانات الجديدة فوراً
+        render();
     }
 
     function unlockVault() {
