@@ -226,7 +226,6 @@
             const dataFromSheet = await response.json();
             
             if (dataFromSheet && dataFromSheet.length > 0) {
-                // ميكانيزم قراءة العواميد بالترتيب التلقائي لمنع حدوث undefined نهائياً
                 subscribers = dataFromSheet.map((item, index) => {
                     const vals = Object.values(item);
                     return {
@@ -303,17 +302,14 @@
         document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري ترحيل الديون وتحديث جوجل شيت... 🔄</div>`;
         
         try {
-            await fetch(SHEET_API_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: "renew", day: dayNumber })
+            await fetch(SHEET_API_URL + "?action=renew&day=" + dayNumber, {
+                method: "POST"
             });
             alert("🚀 تم التدوير والترحيل بنجاح داخل جوجل شيت!");
             setTimeout(loadData, 1200); 
         } catch (e) {
-            alert("حدث خطأ أثناء التجديد!");
-            loadData();
+            closeModal();
+            setTimeout(loadData, 1200);
         }
     }
 
@@ -372,16 +368,14 @@
         document.getElementById('m-pay-btn').innerText = "جاري الإرسال...";
         
         try {
-            await fetch(SHEET_API_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: "pay", id: id, amount: amount })
+            await fetch(SHEET_API_URL + "?action=pay&id=" + id + "&amount=" + amount, {
+                method: "POST"
             });
             closeModal();
             setTimeout(loadData, 1000); 
         } catch (e) {
-            alert("حدث خطأ أثناء إرسال المبلغ لجوجل شيت!");
+            closeModal();
+            setTimeout(loadData, 1000);
         }
     }
 
