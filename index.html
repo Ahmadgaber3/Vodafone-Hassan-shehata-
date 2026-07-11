@@ -297,20 +297,23 @@
         updateCounters();
     }
 
-    async function autoRenewByDay(dayNumber) {
+    // تعديل جذري لضمان غلق الشاشة فوراً بعد الإرسال
+    function autoRenewByDay(dayNumber) {
         if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
         document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري ترحيل الديون وتحديث جوجل شيت... 🔄</div>`;
         
-        try {
-            await fetch(SHEET_API_URL + "?action=renew&day=" + dayNumber, {
-                method: "POST"
-            });
-            alert("🚀 تم التدوير والترحيل بنجاح داخل جوجل شيت!");
-            setTimeout(loadData, 1200); 
-        } catch (e) {
-            closeModal();
-            setTimeout(loadData, 1200);
-        }
+        fetch(SHEET_API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "renew", day: dayNumber })
+        }).then(() => {
+            console.log("Sent successfully");
+        }).catch(err => {
+            console.error("Network flow", err);
+        }).finally(() => {
+            setTimeout(loadData, 1000); 
+        });
     }
 
     function openSubscriberModal(id) {
@@ -335,7 +338,9 @@
 
         document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
         document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('يا غالي حابين نذكرك إن تجديد باقتك يوم ' + sub.renewDay + ' والمتبقي عليك ' + remaining + ' ج')}`);
-        document.getElementById('m-pay-btn').setAttribute('onclick', `submitModalPayment(${id})`);
+        
+        // ربط الزرار الصحيح
+        document.getElementById('m-pay-btn').onclick = function() { submitModalPayment(id); };
 
         const histContent = document.getElementById('m-history-content');
         histContent.innerHTML = sub.history.map(h => `<div class="timeline-item">${h}</div>`).join('') || '<div>لا توجد عمليات مسجلة</div>';
@@ -360,23 +365,29 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
-    async function submitModalPayment(id) {
+    // تعديل جذري لزرار الدفع عشان يقفل وميعلقش نهائي
+    function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
 
-        document.getElementById('m-pay-btn').innerText = "جاري الإرسال...";
+        const btn = document.getElementById('m-pay-btn');
+        btn.innerText = "جاري الإرسال...";
         
-        try {
-            await fetch(SHEET_API_URL + "?action=pay&id=" + id + "&amount=" + amount, {
-                method: "POST"
-            });
+        fetch(SHEET_API_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "pay", id: id, amount: amount })
+        }).then(() => {
+            console.log("Sent successfully");
+        }).catch(err => {
+            console.error("Network flow", err);
+        }).finally(() => {
+            btn.innerText = "دفع الآن";
             closeModal();
             setTimeout(loadData, 1000); 
-        } catch (e) {
-            closeModal();
-            setTimeout(loadData, 1000);
-        }
+        });
     }
 
     function unlockVault() {
