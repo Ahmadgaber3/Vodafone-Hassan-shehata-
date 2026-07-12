@@ -214,7 +214,6 @@
 </div>
 
 <script>
-    // الرابط الجديد الشغال طيارة والمربوط بقاعدة البيانات مباشرة 🚀
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyUakdiZHnco4IiKLoreSESYrTkllXIdKXGlHmruNqjuX_ylCrAzge6fWMDfiIwYQ5w/exec"; 
 
     let subscribers = [];
@@ -227,7 +226,6 @@
             const dataFromSheet = await response.json();
             
             if (dataFromSheet && dataFromSheet.length > 0) {
-                // تخطي الصف الأول المكتوب فيه العناوين والبدء من صف الداتا الفعلي
                 subscribers = dataFromSheet.slice(1).map((vals, index) => {
                     return {
                         id: parseInt(vals[0]) || (index + 1), 
@@ -298,22 +296,18 @@
         updateCounters();
     }
 
+    // 🚀 الحل السحري للتجديد التلقائي عبر الـ Image URL لضمان الاختراق الآمن للـ CORS وسرعة الاستجابة
     function autoRenewByDay(dayNumber) {
         if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
         document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري ترحيل الديون وتحديث جوجل شيت... 🔄</div>`;
         
-        fetch(SHEET_API_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "renew", day: dayNumber })
-        }).then(() => {
-            console.log("Sent");
-        }).catch(err => {
-            console.error(err);
-        }).finally(() => {
-            setTimeout(loadData, 1000); 
-        });
+        const params = "?action=renew&day=" + dayNumber;
+        const img = new Image();
+        img.src = SHEET_API_URL + params;
+        
+        setTimeout(() => {
+            loadData();
+        }, 2000);
     }
 
     function openSubscriberModal(id) {
@@ -364,6 +358,7 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
+    // 🚀 الحل السحري للدفع: يتم إرسال الطلب عبر Image request خارق لقيود المتصفح ليجبر الشيت على التعديل الفوري
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
@@ -372,20 +367,15 @@
         const btn = document.getElementById('m-pay-btn');
         btn.innerText = "جاري الإرسال...";
         
-        fetch(SHEET_API_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ action: "pay", id: id, amount: amount })
-        }).then(() => {
-            console.log("Success");
-        }).catch(err => {
-            console.error(err);
-        }).finally(() => {
+        const params = "?action=pay&id=" + id + "&amount=" + amount;
+        const img = new Image();
+        img.src = SHEET_API_URL + params;
+        
+        setTimeout(() => {
             btn.innerText = "دفع الآن";
             closeModal();
-            setTimeout(loadData, 1000); 
-        });
+            loadData();
+        }, 2000);
     }
 
     function unlockVault() {
