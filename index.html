@@ -214,7 +214,8 @@
 </div>
 
 <script>
-    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbz_RxJWUV40yWnWDDnbPGy2EgcoQ4SCqcUwIPnqqRMAx5mQ2ywvFlVxvSQ9HQYNC8qh/exec"; 
+    // الرابط الجديد الشغال طيارة والمربوط بقاعدة البيانات مباشرة 🚀
+    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyUakdiZHnco4IiKLoreSESYrTkllXIdKXGlHmruNqjuX_ylCrAzge6fWMDfiIwYQ5w/exec"; 
 
     let subscribers = [];
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
@@ -226,8 +227,8 @@
             const dataFromSheet = await response.json();
             
             if (dataFromSheet && dataFromSheet.length > 0) {
-                subscribers = dataFromSheet.map((item, index) => {
-                    const vals = Object.values(item);
+                // تخطي الصف الأول المكتوب فيه العناوين والبدء من صف الداتا الفعلي
+                subscribers = dataFromSheet.slice(1).map((vals, index) => {
                     return {
                         id: parseInt(vals[0]) || (index + 1), 
                         name: vals[1] || "اسم غير مسجل",         
@@ -242,7 +243,7 @@
                 render();
             }
         } catch (error) {
-            listContainer.innerHTML = `<div class="no-results" style="color:red;">❌ خطأ في سحب البيانات الحية. تأكد من إعداد النشر في السكريبت!</div>`;
+            listContainer.innerHTML = `<div class="no-results" style="color:red;">❌ خطأ في سحب البيانات الحية. تأكد من فتح صلاحية الوصول للشيت كـ "Anyone with link"!</div>`;
         }
     }
 
@@ -297,7 +298,6 @@
         updateCounters();
     }
 
-    // تعديل جذري لضمان غلق الشاشة فوراً بعد الإرسال
     function autoRenewByDay(dayNumber) {
         if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
         document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري ترحيل الديون وتحديث جوجل شيت... 🔄</div>`;
@@ -308,9 +308,9 @@
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({ action: "renew", day: dayNumber })
         }).then(() => {
-            console.log("Sent successfully");
+            console.log("Sent");
         }).catch(err => {
-            console.error("Network flow", err);
+            console.error(err);
         }).finally(() => {
             setTimeout(loadData, 1000); 
         });
@@ -339,7 +339,6 @@
         document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
         document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('يا غالي حابين نذكرك إن تجديد باقتك يوم ' + sub.renewDay + ' والمتبقي عليك ' + remaining + ' ج')}`);
         
-        // ربط الزرار الصحيح
         document.getElementById('m-pay-btn').onclick = function() { submitModalPayment(id); };
 
         const histContent = document.getElementById('m-history-content');
@@ -365,7 +364,6 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
-    // تعديل جذري لزرار الدفع عشان يقفل وميعلقش نهائي
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
@@ -380,9 +378,9 @@
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify({ action: "pay", id: id, amount: amount })
         }).then(() => {
-            console.log("Sent successfully");
+            console.log("Success");
         }).catch(err => {
-            console.error("Network flow", err);
+            console.error(err);
         }).finally(() => {
             btn.innerText = "دفع الآن";
             closeModal();
