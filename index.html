@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين الاحترافية</title>
+    <title>لوحة إدارة المشتركين - النسخة الأصلية المستقرة</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -16,6 +16,7 @@
             --text-sub: #64748b;
             --radius: 12px;
         }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg); color: var(--text-main); padding: 8px; font-size: 12px; min-height: 100vh; }
         body.modal-open .main-content { filter: blur(6px); pointer-events: none; }
@@ -142,7 +143,7 @@
 </div>
 
 <script>
-    // الرابط الفعلي والمعدل رسمي 🚀
+    // رابط السكريبت الأخير المحدث والجاهز 🚀
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwls53YP30NR3X6rprAvIeLPHoqF1cNhRZpWHBKBc1FC7I-rLShHY00nNTEu2qhYtay/exec"; 
 
     let subscribers = [];
@@ -153,6 +154,7 @@
             const response = await fetch(SHEET_API_URL);
             const dataFromSheet = await response.json();
             if (dataFromSheet && dataFromSheet.length > 0) {
+                // العودة لطريقة تفكيك الداتا الأصلية الحية
                 subscribers = dataFromSheet.slice(1).map((vals, index) => {
                     return {
                         id: parseInt(vals[0]) || (index + 1), 
@@ -240,6 +242,7 @@
         if (isNaN(amount) || amount <= 0) return;
         document.getElementById('m-pay-btn').innerText = "جاري الحفظ...";
 
+        // طريقة الخصم الأصلية المستقرة
         fetch(`${SHEET_API_URL}?action=pay&id=${id}&amount=${amount}`, { method: 'POST', mode: 'no-cors' })
         .then(() => console.log('Sent'))
         .finally(() => {
