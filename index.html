@@ -226,6 +226,7 @@
             const dataFromSheet = await response.json();
             
             if (dataFromSheet && dataFromSheet.length > 0) {
+                // تعديل طريقة القراءة: الكود الجديد من جيت هاب هيفك مصفوفة الصفوف (الـ Index-based) بنجاح ومن غير خطأ
                 subscribers = dataFromSheet.slice(1).map((vals, index) => {
                     return {
                         id: parseInt(vals[0]) || (index + 1), 
@@ -296,7 +297,6 @@
         updateCounters();
     }
 
-    // 🚀 الحل السحري للتجديد التلقائي عبر الـ Image URL لضمان الاختراق الآمن للـ CORS وسرعة الاستجابة
     function autoRenewByDay(dayNumber) {
         if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
         document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري ترحيل الديون وتحديث جوجل شيت... 🔄</div>`;
@@ -358,7 +358,6 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
-    // 🚀 الحل السحري للدفع: يتم إرسال الطلب عبر Image request خارق لقيود المتصفح ليجبر الشيت على التعديل الفوري
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
