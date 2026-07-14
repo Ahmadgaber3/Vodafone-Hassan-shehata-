@@ -115,7 +115,6 @@
         .no-results { text-align: center; padding: 20px; color: var(--text-sub); background: white; border-radius: var(--radius); }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: #2563eb; background: white; border-radius: var(--radius); }
         
-        /* أزرار لوحة التحكم المضافة */
         .admin-bar { display: flex; margin-bottom: 8px; }
         .admin-add-btn { width: 100%; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
         .admin-add-btn:active { transform: scale(0.97); }
@@ -129,7 +128,6 @@
             <h1>نظام إدارة المشتركين والاتصالات</h1>
         </header>
 
-        <!-- لوحة التحكم السريعة لإضافة مشترك -->
         <div class="admin-bar">
             <button class="admin-add-btn" onclick="openAddSubscriberModal()">➕ إضافة مشترك جديد للسيستم</button>
         </div>
@@ -184,7 +182,6 @@
     </div>
 </div>
 
-<!-- موديول التفاصيل الأصلي والدفع -->
 <div class="modal-overlay" id="detailsModal" onclick="closeModalOutside(event)">
     <div class="modal-card">
         <div class="modal-header">
@@ -220,7 +217,6 @@
             <div id="m-history-content"></div>
         </div>
 
-        <!-- أزرار الإدارة المضافة للتعديل والحذف فوري -->
         <div class="actions-row" style="margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 10px; gap: 4px;">
             <button class="action-link" style="background: #e2e8f0; color: #0f172a; font-size: 10px;" onclick="openEditModalFromDetails()">✏️ تعديل البيانات</button>
             <button class="action-link" style="background: #dc2626; color: white; font-size: 10px;" onclick="deleteActiveSubscriber()">❌ حذف العميل نهائياً</button>
@@ -228,7 +224,6 @@
     </div>
 </div>
 
-<!-- موديول إضافة مشترك جديد -->
 <div class="modal-overlay" id="addModal" onclick="closeAddModalOutside(event)">
     <div class="modal-card">
         <div class="modal-header">
@@ -241,12 +236,11 @@
             <input type="number" id="add-renew" class="search-input" placeholder="يوم التجديد في الشهر (مثلاً: 8)...">
             <input type="number" id="add-price" class="search-input" placeholder="سعر باقة الاشتراك (مثلاً: 150)...">
             <input type="number" id="add-debt" class="search-input" placeholder="ديون قديمة متأخرة عليه (إن وجد)...">
-            <button class="btn" style="background: #16a34a; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;" onclick="submitAddSubscriber()">حفظ وإضافة للسيستم</button>
+            <button class="btn" style="background: #16a34a; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; width:100%;" onclick="submitAddSubscriber()">حفظ وإضافة للسيستم</button>
         </div>
     </div>
 </div>
 
-<!-- موديول تعديل مشترك -->
 <div class="modal-overlay" id="editModal" onclick="closeEditModalOutside(event)">
     <div class="modal-card">
         <div class="modal-header">
@@ -272,13 +266,13 @@
             <label style="font-size: 10px; font-weight: bold;">المدفوع الفعلي هذا الشهر:</label>
             <input type="number" id="edit-paid" class="search-input">
             
-            <button class="btn" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;" onclick="submitEditSubscriber()">حفظ التعديلات الجديدة</button>
+            <button class="btn" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; width:100%;" onclick="submitEditSubscriber()">حفظ التعديلات الجديدة</button>
         </div>
     </div>
 </div>
 
 <script>
-    // 📊 لستة الـ 47 مشترك الأساسية بالبيانات والديون والأرقام الحقيقية[span_1](start_span)[span_1](end_span)
+    // 📊 لستة الـ 47 مشترك الأساسية بالبيانات والديون والأرقام الحقيقية[span_0](start_span)[span_0](end_span)
     const defaultSubscribers = [
         { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"] },
         { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"] },
@@ -337,7 +331,7 @@
         if (stored) {
             subscribers = JSON.parse(stored);
         } else {
-            subscribers = defaultSubscribers; // تحميل اللستة الـ 47 الأساسية[span_2](start_span)[span_2](end_span)
+            subscribers = defaultSubscribers;
             saveData();
         }
         render();
@@ -447,7 +441,6 @@
     function closeModal() { 
         document.getElementById('detailsModal').style.display = 'none'; 
         document.body.classList.remove('modal-open'); 
-        activeSubId = null; 
     }
     function closeModalOutside(e) { if(e.target.id === 'detailsModal') closeModal(); }
 
@@ -472,7 +465,6 @@
         }
     }
 
-    // ➕ إضافة مشترك جديد
     function openAddSubscriberModal() {
         document.getElementById('add-name').value = '';
         document.getElementById('add-phone').value = '';
@@ -516,11 +508,12 @@
         alert(`تمت إضافة العميل [ ${name} ] للسيستم بنجاح! 🎉`);
     }
 
-    // ✏️ تعديل بيانات مشترك
+    // ✏️ تم تصليح وتأمين جلب المعرف لضمان الحفظ الفوري
     function openEditModalFromDetails() {
         const sub = subscribers.find(s => s.id === activeSubId);
         if(!sub) return;
 
+        // تعبئة البيانات في المودال الجديد
         document.getElementById('edit-name').value = sub.name;
         document.getElementById('edit-phone').value = sub.phone;
         document.getElementById('edit-renew').value = sub.renewDay;
@@ -528,16 +521,23 @@
         document.getElementById('edit-debt').value = sub.previousDebt;
         document.getElementById('edit-paid').value = sub.currentPaid;
 
-        closeModal(); // قفل صفحة التفاصيل أولاً
-        document.getElementById('editModal').style.display = 'flex';
+        document.getElementById('detailsModal').style.display = 'none'; // قفل تفاصيل العميل بس
+        document.getElementById('editModal').style.display = 'flex';    // فتح تعديل البيانات
     }
 
-    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+    function closeEditModal() { 
+        document.getElementById('editModal').style.display = 'none'; 
+        document.body.classList.remove('modal-open'); 
+    }
     function closeEditModalOutside(e) { if(e.target.id === 'editModal') closeEditModal(); }
 
     function submitEditSubscriber() {
+        // البحث بالمعرف المثبت والنشط حالياً
         const sub = subscribers.find(s => s.id === activeSubId);
-        if(!sub) return;
+        if(!sub) {
+            alert("خطأ: لم يتم تحديد المشترك بشكل صحيح!");
+            return;
+        }
 
         const name = document.getElementById('edit-name').value.trim();
         const phone = document.getElementById('edit-phone').value.trim();
@@ -551,6 +551,7 @@
             return;
         }
 
+        // تحديث الداتا في المصفوفة
         sub.name = name;
         sub.phone = phone;
         sub.renewDay = renew;
@@ -565,7 +566,6 @@
         alert("تم حفظ التعديلات بنجاح! ✏️");
     }
 
-    // ❌ حذف مشترك نهائياً
     function deleteActiveSubscriber() {
         const sub = subscribers.find(s => s.id === activeSubId);
         if(!sub) return;
