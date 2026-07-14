@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين المؤمنة بالتاريخ والواتساب التلقائي</title>
+    <title>لوحة إدارة المشتركين الاحترافية المستقرة</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -14,27 +14,45 @@
             --card-bg: #ffffff;
             --text-main: #0f172a;
             --text-sub: #64748b;
+            --border: #cbd5e1;
             --radius: 12px;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+        /* 🌙 مظهر الوضع الداكن */
+        body.dark-mode {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border: #334155;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; transition: background 0.1s, color 0.1s; }
         body { background-color: var(--bg); color: var(--text-main); padding: 8px; font-size: 12px; position: relative; min-height: 100vh; }
         
         body.modal-open .main-content { filter: blur(6px); pointer-events: none; }
         .container { max-width: 430px; margin: 0 auto; }
         
-        header { text-align: center; margin: 6px 0 10px 0; }
-        header h1 { font-size: 15px; font-weight: 800; color: #1e3a8a; }
+        header { display: flex; justify-content: space-between; align-items: center; margin: 6px 0 10px 0; }
+        header h1 { font-size: 15px; font-weight: 800; color: #2563eb; }
         
+        .theme-toggle-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+        /* 🔔 شريط التنبيهات */
+        .notification-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 8px 12px; border-radius: var(--radius); margin-bottom: 8px; display: none; align-items: center; justify-content: space-between; font-size: 11px; font-weight: bold; }
+        body.dark-mode .notification-bar { background: #1e3a8a; border-color: #2563eb; color: #eff6ff; }
+        .notification-btn { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
+
         .search-container { margin-bottom: 8px; }
-        .search-input { width: 100%; padding: 8px 12px; border-radius: var(--radius); border: 1px solid #cbd5e1; font-size: 12px; outline: none; }
+        .search-input { width: 100%; padding: 8px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); font-size: 12px; outline: none; }
 
         .renew-days-bar { display: flex; gap: 4px; margin-bottom: 8px; }
         .renew-day-btn { flex: 1; background: #0f172a; color: white; border: none; padding: 8px 4px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
-        
-        .tabs { display: flex; background: #cbd5e1; padding: 2px; border-radius: var(--radius); margin-bottom: 8px; gap: 2px; }
+        body.dark-mode .renew-day-btn { background: #334155; }
+
+        .tabs { display: flex; background: var(--border); padding: 2px; border-radius: var(--radius); margin-bottom: 8px; gap: 2px; }
         .tab-btn { flex: 1; padding: 6px 4px; border: none; background: none; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-main); border-radius: 10px; display: flex; flex-direction: column; align-items: center; }
-        .tab-btn span.count { font-size: 9px; background: #f1f5f9; padding: 1px 5px; border-radius: 20px; color: var(--text-main); margin-top: 2px; }
+        .tab-btn span.count { font-size: 9px; background: var(--bg); padding: 1px 5px; border-radius: 20px; color: var(--text-main); margin-top: 2px; }
         
         .tab-btn.active { background: #2563eb; color: white; }
         .tab-btn.active span.count { background: rgba(255, 255, 255, 0.3); color: white; }
@@ -46,14 +64,14 @@
         .section-content.active { display: block; }
 
         .subscribers-list { display: flex; flex-direction: column; gap: 6px; }
-        .user-card { background: var(--card-bg); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; overflow: hidden; z-index: 1; }
+        .user-card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s ease; position: relative; overflow: hidden; z-index: 1; }
         
-        .user-card::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 5px; background: #cbd5e1; }
+        .user-card::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 5px; background: var(--border); }
         .user-card.fully-paid::before { background: var(--success); }
         .user-card.partial-paid::before { background: var(--warning); }
         .user-card.unpaid::before { background: var(--danger); }
         
-        .user-info-main h3 { font-size: 13px; font-weight: 700; color: #1e293b; }
+        .user-info-main h3 { font-size: 13px; font-weight: 700; color: var(--text-main); }
         .countdown-text { font-size: 10px; color: var(--text-sub); margin-top: 2px; display: block; }
         
         .status-badge { font-size: 9px; padding: 2px 6px; border-radius: 6px; font-weight: 700; color: white; }
@@ -69,18 +87,18 @@
         }
         
         .modal-card { 
-            background: #ffffff; width: 100%; max-width: 380px; 
-            border-radius: 16px; padding: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+            background: var(--card-bg); width: 100%; max-width: 380px; 
+            border-radius: 16px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
             animation: fadeInCenter 0.2s ease-out; position: relative;
         }
         
         @keyframes fadeInCenter { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
         .modal-header h2 { font-size: 14px; font-weight: 800; }
-        .close-modal-btn { background: #f1f5f9; border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .close-modal-btn { background: var(--bg); border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
-        .detail-item { background: #f8fafc; padding: 6px 8px; border-radius: 8px; border: 1px solid #f1f5f9; }
+        .detail-item { background: var(--bg); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); }
         .detail-item span { display: block; font-size: 9px; color: var(--text-sub); margin-bottom: 1px; }
         .detail-item strong { color: var(--text-main); font-size: 13px; font-weight: 700; }
 
@@ -90,14 +108,14 @@
         .btn-whatsapp { background: #25d366; }
 
         .payment-action { display: flex; gap: 4px; margin-bottom: 6px; }
-        .payment-input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 11px; }
+        .payment-input { flex: 1; padding: 6px 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); border-radius: 8px; outline: none; font-size: 11px; }
         .submit-pay-btn { background: #2563eb; color: white; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px; }
 
-        .cash-calc-box { background: #fff7ed; padding: 6px; border-radius: 8px; border: 1px solid #ffedd5; display: flex; justify-content: space-between; align-items: center; font-size: 10px; margin-bottom: 8px; }
-        .history-box { background: #f8fafc; padding: 6px 8px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px; max-height: 80px; overflow-y: auto; }
+        .cash-calc-box { background: #fff7ed; padding: 6px; border-radius: 8px; border: 1px solid #ffedd5; display: flex; justify-content: space-between; align-items: center; color: #7c2d12; font-size: 10px; margin-bottom: 8px; }
+        .history-box { background: var(--bg); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; max-height: 80px; overflow-y: auto; }
         .history-title { font-weight: 700; color: var(--text-sub); margin-bottom: 4px; }
-        .timeline-item { position: relative; padding-right: 12px; margin-bottom: 4px; color: #475569; font-size: 10px; }
-        .timeline-item::before { content: ''; position: absolute; right: 2px; top: 4px; width: 5px; height: 5px; background: #cbd5e1; border-radius: 50%; }
+        .timeline-item { position: relative; padding-right: 12px; margin-bottom: 4px; color: var(--text-main); font-size: 10px; }
+        .timeline-item::before { content: ''; position: absolute; right: 2px; top: 4px; width: 5px; height: 5px; background: var(--text-sub); border-radius: 50%; }
 
         .vault-view { background: #0f172a; color: white; padding: 14px; border-radius: var(--radius); }
         .vault-auth { display: flex; gap: 6px; justify-content: center; padding: 20px 0; }
@@ -110,7 +128,7 @@
         .vault-card-item strong { font-size: 16px; color: #38bdf8; }
         
         .eye-btn { width: 100%; background: #334155; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
-        .no-results { text-align: center; padding: 20px; color: var(--text-sub); background: white; border-radius: var(--radius); }
+        .no-results { text-align: center; padding: 20px; color: var(--text-sub); background: var(--card-bg); border-radius: var(--radius); }
         
         .admin-bar { display: flex; gap: 4px; margin-bottom: 8px; }
         .admin-add-btn { flex: 2; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
@@ -122,14 +140,25 @@
 <div class="main-content">
     <div class="container">
         <header>
-            <h1>نظام إدارة المشتركين والاتصالات</h1>
+            <h1>نظام إدارة المشتركين</h1>
+            <button class="theme-toggle-btn" onclick="toggleTheme()">🌙 وضع الليل</button>
         </header>
+
+        <!-- 🔔 شريط التنبيهات للتجديدات اليومية -->
+        <div class="notification-bar" id="notificationBar">
+            <span id="notificationText">يوجد اليوم مشتركين تجديدهم اليوم!</span>
+            <button class="notification-btn" onclick="filterByTodayRenewals()">عرض المشتركين 🔍</button>
+        </div>
 
         <div class="admin-bar">
             <button class="admin-add-btn" onclick="openAddSubscriberModal()">➕ إضافة مشترك جديد</button>
             <button class="backup-btn" onclick="downloadBackup()">📥 نسخ احتياطي</button>
             <button class="backup-btn" style="background:#0f172a;" onclick="triggerUploadBackup()">📤 استعادة</button>
             <input type="file" id="backupFile" style="display:none;" onchange="uploadBackup(event)">
+        </div>
+
+        <div class="admin-bar">
+            <button class="admin-add-btn" style="background:#d97706;" onclick="sendGroupDebtReminders()">📢 تذكير جماعي بالديون لجميع المتأخرين (واتساب)</button>
         </div>
 
         <div class="renew-days-bar">
@@ -217,7 +246,7 @@
             <div id="m-history-content"></div>
         </div>
 
-        <div class="actions-row" style="margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 10px; gap: 4px;">
+        <div class="actions-row" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; gap: 4px;">
             <button class="action-link" style="background: #e2e8f0; color: #0f172a; font-size: 10px;" onclick="openEditModalFromDetails()">✏️ تعديل البيانات</button>
             <button class="action-link" style="background: #dc2626; color: white; font-size: 10px;" onclick="deleteActiveSubscriber()">❌ حذف العميل نهائياً</button>
         </div>
@@ -329,28 +358,69 @@
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
 
     function initData() {
-        const stored = localStorage.getItem('local_subscribers_pro_sec_v4');
+        const storedTheme = localStorage.getItem('theme_pref_v6');
+        if (storedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            document.querySelector('.theme-toggle-btn').innerText = "☀️ وضع النهار";
+        }
+
+        const stored = localStorage.getItem('local_subscribers_v6');
         if (stored) {
             subscribers = JSON.parse(stored);
         } else {
-            subscribers = defaultSubscribers;[span_1](start_span)[span_1](end_span)
+            subscribers = defaultSubscribers;
             saveData();
         }
         render();
+        checkTodayRenewals(); 
     }
 
     function saveData() {
-        localStorage.setItem('local_subscribers_pro_sec_v4', JSON.stringify(subscribers));
+        localStorage.setItem('local_subscribers_v6', JSON.stringify(subscribers));
     }
 
-    function checkAdminAuth() {
-        const pin = prompt("🔐 برجاء إدخال رمز الإدارة السري للمتابعة:");
-        if (pin === ADMIN_PIN) {
-            return true;
+    function toggleTheme() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme_pref_v6', isDark ? 'dark' : 'light');
+        document.querySelector('.theme-toggle-btn').innerText = isDark ? "☀️ وضع النهار" : "🌙 وضع الليل";
+    }
+
+    function checkTodayRenewals() {
+        const todayDay = new Date().getDate(); 
+        const count = subscribers.filter(s => s.renewDay === todayDay).length;
+        const bar = document.getElementById('notificationBar');
+        
+        if (count > 0) {
+            document.getElementById('notificationText').innerText = `⚠️ تنبيه: لديك اليوم [${count}] مشتركين ميعاد تجديد باقتهم النهاردة!`;
+            bar.style.display = 'flex';
         } else {
-            alert("❌ رمز حماية خاطئ! لا يمكنك التعديل.");
-            return false;
+            bar.style.display = 'none';
         }
+    }
+
+    function filterByTodayRenewals() {
+        const todayDay = new Date().getDate();
+        document.getElementById('searchInput').value = '';
+        searchQuery = '';
+        switchTab('all');
+        const listContainer = document.getElementById('subscribersList');
+        listContainer.innerHTML = '';
+        
+        const filtered = subscribers.filter(s => s.renewDay === todayDay);
+        filtered.forEach(sub => {
+            const { status, statusText } = getSubscriberStatus(sub);
+            const card = document.createElement('div');
+            card.className = `user-card ${status}`;
+            card.setAttribute('onclick', `openSubscriberModal(${sub.id})`);
+            card.innerHTML = `
+                <div class="user-info-main">
+                    <h3>${sub.name}</h3>
+                    <span class="countdown-text">📅 تجديده اليوم (يوم ${sub.renewDay})</span>
+                </div>
+                <span class="status-badge">${statusText}</span>
+            `;
+            listContainer.appendChild(card);
+        });
     }
 
     function getFormattedDateTime() {
@@ -426,13 +496,13 @@
                 const { remaining } = getSubscriberStatus(sub);
                 sub.previousDebt = remaining; 
                 sub.currentPaid = 0;          
-                sub.history.push(`${timestamp} تجديد تلقائي. ترحيل ديون: ${remaining} ج`);
+                sub.history.push(`${timestamp} تدوير تلقائي للمتبقي: ${remaining} ج`);
             }
         });
         
         saveData();
         render();
-        alert(`تم تجديد وترحيل ديون جميع مشتركين يوم ${dayNumber} بنجاح! 🚀`);
+        alert(`تم تدوير حسابات يوم ${dayNumber} بنجاح! 🚀`);
     }
 
     function openSubscriberModal(id) {
@@ -477,7 +547,6 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
-    // 🚀 دالة تسجيل الدفع وتوجيه الواتساب التلقائي بالبيانات 🚀
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
@@ -486,38 +555,52 @@
         const sub = subscribers.find(s => s.id === id);
         if (sub) {
             const timestamp = getFormattedDateTime();
-            
-            // 1. تحديث المدفوعات وحفظ الداتا محلياً
             sub.currentPaid += amount;
             sub.history.push(`${timestamp} دفع: ${amount} ج`);
             saveData();
 
-            // 2. حساب المتبقي النهائي لإرساله في الرسالة
             const { remaining } = getSubscriberStatus(sub);
             
-            // 3. صياغة نص رسالة الواتس الاحترافية
             const waMessage = `يا غالي، تم استلام مبلغ (${amount}) ج بنجاح بتاريخ ${timestamp.split(' - ')[0].replace('[','')}.
 • حساب باقتك الحالي: (${sub.packagePrice}) ج.
-• ديون قديمة متأخرة: (${sub.previousDebt}) j.
+• ديون قديمة متأخرة: (${sub.previousDebt}) ج.
 • إجمالي المدفوع هذا الشهر: (${sub.currentPaid}) ج.
 *المتبقي النهائي عليك حالياً: (${remaining}) ج.*
 شكراً لتعاملك معنا! 🌸`;
 
-            // 4. تنظيف رقم التليفون لفتح الواتساب
             let cleanPhone = sub.phone.toString();
             if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
                 cleanPhone = '0' + cleanPhone;
             }
 
-            // 5. التوجيه التلقائي المباشر للواتس بالرسالة المكتوبة
             const waUrl = `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
             
             closeModal();
             render();
 
-            // فتح الواتساب تلقائياً في نافذة جديدة
             window.open(waUrl, '_blank');
         }
+    }
+
+    function sendGroupDebtReminders() {
+        if (!confirm("هل تريد تجميع كل العملاء المتبقي عليهم ديون حالياً وفتح رسائل تذكير الواتس لهم تباعاً؟")) return;
+        
+        const debtors = subscribers.filter(sub => getSubscriberStatus(sub).remaining > 0);
+        if (debtors.length === 0) {
+            alert("كل العملاء مسددين بالكامل ولا يوجد أي ديون حالياً! 🌸");
+            return;
+        }
+
+        debtors.forEach((sub, index) => {
+            setTimeout(() => {
+                const { remaining } = getSubscriberStatus(sub);
+                const msg = `يا غالي، حابين نذكرك أن متبقي عليك حساب الاشتراك بقيمة (${remaining}) ج. برجاء تصفية الحساب في أقرب وقت متاح لمتابعة الخدمة. شكراً لك! 🌸`;
+                let cleanPhone = sub.phone.toString();
+                if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) cleanPhone = '0' + cleanPhone;
+                
+                window.open(`https://wa.me/2${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+            }, index * 1000); 
+        });
     }
 
     function openAddSubscriberModal() {
@@ -613,7 +696,7 @@
         sub.packagePrice = price;
         sub.previousDebt = debt;
         sub.currentPaid = paid;
-        sub.history.push(`${timestamp} تعديل البيانات الأساسية`);
+        sub.history.push(`${timestamp} تعديل البيانات الأساسية يدوياً`);
 
         saveData();
         closeEditModal();
@@ -645,12 +728,6 @@
         downloadAnchor.remove();
     }
 
-    document.body.addEventListener('click', function(e) {
-        if (e.target && e.target.id === 'backupFile') {
-            e.stopPropagation();
-        }
-    });
-
     function triggerUploadBackup() {
         if (!checkAdminAuth()) return; 
         document.getElementById('backupFile').click();
@@ -678,6 +755,13 @@
         };
         reader.readAsText(file);
         event.target.value = ''; 
+    }
+
+    function checkAdminAuth() {
+        const pin = prompt("🔐 برجاء إدخال رمز الإدارة السري للمتابعة:");
+        if (pin === ADMIN_PIN) return true;
+        alert("❌ رمز حماية خاطئ!");
+        return false;
     }
 
     function unlockVault() {
