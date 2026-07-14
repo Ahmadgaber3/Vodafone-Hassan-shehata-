@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين المؤمنة بالكامل</title>
+    <title>لوحة إدارة المشتركين المؤمنة بالتاريخ الفوري</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -125,7 +125,6 @@
             <h1>نظام إدارة المشتركين والاتصالات</h1>
         </header>
 
-        <!-- شريط الإدارة والنسخ الاحتياطي السحري -->
         <div class="admin-bar">
             <button class="admin-add-btn" onclick="openAddSubscriberModal()">➕ إضافة مشترك جديد</button>
             <button class="backup-btn" onclick="downloadBackup()">📥 نسخ احتياطي</button>
@@ -275,6 +274,7 @@
 <script>
     const ADMIN_PIN = "5566"; // 🔐 رمز الحماية للإدارة والتعديلات
 
+    // لستة الـ 47 مشترك الأساسية[span_0](start_span)[span_0](end_span)
     const defaultSubscribers = [
         { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"] },
         { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"] },
@@ -329,7 +329,7 @@
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
 
     function initData() {
-        const stored = localStorage.getItem('local_subscribers_pro_sec');
+        const stored = localStorage.getItem('local_subscribers_pro_sec_v3');
         if (stored) {
             subscribers = JSON.parse(stored);
         } else {
@@ -340,10 +340,9 @@
     }
 
     function saveData() {
-        localStorage.setItem('local_subscribers_pro_sec', JSON.stringify(subscribers));
+        localStorage.setItem('local_subscribers_pro_sec_v3', JSON.stringify(subscribers));
     }
 
-    // 🔒 دالة التحقق من رمز الإدارة السري
     function checkAdminAuth() {
         const pin = prompt("🔐 برجاء إدخال رمز الإدارة السري للمتابعة:");
         if (pin === ADMIN_PIN) {
@@ -352,6 +351,20 @@
             alert("❌ رمز حماية خاطئ! لا يمكنك التعديل.");
             return false;
         }
+    }
+
+    // 🕒 دالة سحرية لجلب التاريخ والوقت المنسق بالملي فوري حسب توقيت جهازك
+    function getFormattedDateTime() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = now.getMonth() + 1;
+        const d = now.getDate();
+        let hours = now.getHours();
+        const mins = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'م' : 'ص';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // الساعة 0 تصبح 12
+        return `[${d}/${m}/${y} - ${hours}:${mins} ${ampm}]`;
     }
 
     function getSubscriberStatus(sub) {
@@ -405,15 +418,16 @@
     }
 
     function autoRenewByDay(dayNumber) {
-        if (!checkAdminAuth()) return; // حماية
+        if (!checkAdminAuth()) return; 
         if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
         
+        const timestamp = getFormattedDateTime();
         subscribers.forEach(sub => {
             if (sub.renewDay === dayNumber) {
                 const { remaining } = getSubscriberStatus(sub);
                 sub.previousDebt = remaining; 
                 sub.currentPaid = 0;          
-                sub.history.push(`تجديد تلقائي. ديون مرحلة: ${remaining} ج`);
+                sub.history.push(`${timestamp} تجديد تلقائي. ترحيل ديون: ${remaining} ج`);
             }
         });
         
@@ -471,8 +485,9 @@
 
         const sub = subscribers.find(s => s.id === id);
         if (sub) {
+            const timestamp = getFormattedDateTime(); // جلب التاريخ الحالي والوقت بالدقيقة
             sub.currentPaid += amount;
-            sub.history.push(`تم دفع ${amount} ج`);
+            sub.history.push(`${timestamp} دفع: ${amount} ج`); // تسجيل التاريخ بدقة مع الدفعة
             saveData();
             closeModal();
             render();
@@ -480,7 +495,7 @@
     }
 
     function openAddSubscriberModal() {
-        if (!checkAdminAuth()) return; // حماية
+        if (!checkAdminAuth()) return; 
         document.getElementById('add-name').value = '';
         document.getElementById('add-phone').value = '';
         document.getElementById('add-renew').value = '';
@@ -505,7 +520,8 @@
         }
 
         const newId = subscribers.length > 0 ? Math.max(...subscribers.map(s => s.id)) + 1 : 1;
-        
+        const timestamp = getFormattedDateTime();
+
         subscribers.push({
             id: newId,
             name: name,
@@ -514,7 +530,7 @@
             packagePrice: price,
             previousDebt: debt,
             currentPaid: 0,
-            history: ["تاريخ الإضافة للسيستم"]
+            history: [`${timestamp} تمت الإضافة للسيستم`]
         });
 
         saveData();
@@ -524,7 +540,7 @@
     }
 
     function openEditModalFromDetails() {
-        if (!checkAdminAuth()) return; // حماية
+        if (!checkAdminAuth()) return; 
         const sub = subscribers.find(s => s.id === activeSubId);
         if(!sub) return;
 
@@ -564,13 +580,14 @@
             return;
         }
 
+        const timestamp = getFormattedDateTime();
         sub.name = name;
         sub.phone = phone;
         sub.renewDay = renew;
         sub.packagePrice = price;
         sub.previousDebt = debt;
         sub.currentPaid = paid;
-        sub.history.push(`تم تعديل البيانات الأساسية يدوياً`);
+        sub.history.push(`${timestamp} تعديل البيانات الأساسية`);
 
         saveData();
         closeEditModal();
@@ -579,7 +596,7 @@
     }
 
     function deleteActiveSubscriber() {
-        if (!checkAdminAuth()) return; // حماية
+        if (!checkAdminAuth()) return; 
         const sub = subscribers.find(s => s.id === activeSubId);
         if(!sub) return;
 
@@ -592,7 +609,6 @@
         }
     }
 
-    // 📥 دالة تحميل نسخة احتياطية من البيانات على جهازك
     function downloadBackup() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(subscribers));
         const downloadAnchor = document.createElement('a');
@@ -603,12 +619,17 @@
         downloadAnchor.remove();
     }
 
+    document.body.addEventListener('click', function(e) {
+        if (e.target && e.target.id === 'backupFile') {
+            e.stopPropagation();
+        }
+    });
+
     function triggerUploadBackup() {
-        if (!checkAdminAuth()) return; // حماية
+        if (!checkAdminAuth()) return; 
         document.getElementById('backupFile').click();
     }
 
-    // 📤 دالة رفع واستعادة نسخة احتياطية للسيستم فوري
     function uploadBackup(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -630,6 +651,7 @@
             }
         };
         reader.readAsText(file);
+        event.target.value = ''; // تصفير لتسهيل الرفع المتكرر
     }
 
     function unlockVault() {
