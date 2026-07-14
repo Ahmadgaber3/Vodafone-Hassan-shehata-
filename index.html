@@ -214,8 +214,8 @@
 </div>
 
 <script>
-    // الرابط الفعلي الحقيقي والجديد الشغال 100% بدون أي تعليق
-    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwls53YP30NR3X6rprAvIeLPHoqF1cNhRZpWHBKBc1FC7I-rLShHY00nNTEu2qhYtay/exec"; 
+    // 🚀 الرابط الحقيقي الجديد المربوط بـ Apps Script مباشرة 🚀
+    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbylWLAffCuuAzc4zFrQbXspUEQYbaNu3D7bnI87KcXeEyWCEvYuEW86Ax6B-RkQUNCs/exec"; 
 
     let subscribers = [];
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
@@ -227,7 +227,7 @@
             const dataFromSheet = await response.json();
             
             if (dataFromSheet && dataFromSheet.length > 0) {
-                // ميكانيزم قراءة العواميد المعتمد على المصفوفات لضمان عدم حدوث undefined
+                // ميكانيزم القراءة المستقر 100% المعتمد على المصفوفات
                 subscribers = dataFromSheet.slice(1).map((item, index) => {
                     const vals = Object.values(item);
                     return {
@@ -244,7 +244,7 @@
                 render();
             }
         } catch (error) {
-            listContainer.innerHTML = `<div class="no-results" style="color:red;">❌ خطأ في سحب البيانات الحية. تأكد من إعداد النشر في السكريبت!</div>`;
+            listContainer.innerHTML = `<div class="no-results" style="color:red;">❌ خطأ في سحب البيانات الحية. تأكد من فتح صلاحية "Anyone with link" في الشيت ومسح كاش المتصفح!</div>`;
         }
     }
 
