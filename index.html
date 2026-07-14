@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين الاحترافية</title>
+    <title>لوحة إدارة المشتركين الاحترافية الشاملة</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -87,7 +87,7 @@
         .detail-item strong { color: var(--text-main); font-size: 13px; font-weight: 700; }
 
         .actions-row { display: flex; gap: 6px; margin-bottom: 8px; }
-        .action-link { flex: 1; text-decoration: none; text-align: center; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; color: white; }
+        .action-link { flex: 1; text-decoration: none; text-align: center; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; color: white; border: none; cursor: pointer; }
         .btn-call { background: #16a34a; }
         .btn-whatsapp { background: #25d366; }
 
@@ -114,6 +114,11 @@
         .eye-btn { width: 100%; background: #334155; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
         .no-results { text-align: center; padding: 20px; color: var(--text-sub); background: white; border-radius: var(--radius); }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: #2563eb; background: white; border-radius: var(--radius); }
+        
+        /* أزرار لوحة التحكم المضافة */
+        .admin-bar { display: flex; margin-bottom: 8px; }
+        .admin-add-btn { width: 100%; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .admin-add-btn:active { transform: scale(0.97); }
     </style>
 </head>
 <body>
@@ -123,6 +128,11 @@
         <header>
             <h1>نظام إدارة المشتركين والاتصالات</h1>
         </header>
+
+        <!-- لوحة التحكم السريعة لإضافة مشترك -->
+        <div class="admin-bar">
+            <button class="admin-add-btn" onclick="openAddSubscriberModal()">➕ إضافة مشترك جديد للسيستم</button>
+        </div>
 
         <div class="renew-days-bar">
             <button class="renew-day-btn" onclick="autoRenewByDay(8)">🔄 تجديد مشتركين يوم 8</button>
@@ -174,6 +184,7 @@
     </div>
 </div>
 
+<!-- موديول التفاصيل الأصلي والدفع -->
 <div class="modal-overlay" id="detailsModal" onclick="closeModalOutside(event)">
     <div class="modal-card">
         <div class="modal-header">
@@ -208,11 +219,66 @@
             <div class="history-title">📜 سجل العمليات هذا الشهر:</div>
             <div id="m-history-content"></div>
         </div>
+
+        <!-- أزرار الإدارة المضافة للتعديل والحذف فوري -->
+        <div class="actions-row" style="margin-top: 10px; border-top: 1px solid #f1f5f9; padding-top: 10px; gap: 4px;">
+            <button class="action-link" style="background: #e2e8f0; color: #0f172a; font-size: 10px;" onclick="openEditModalFromDetails()">✏️ تعديل البيانات</button>
+            <button class="action-link" style="background: #dc2626; color: white; font-size: 10px;" onclick="deleteActiveSubscriber()">❌ حذف العميل نهائياً</button>
+        </div>
+    </div>
+</div>
+
+<!-- موديول إضافة مشترك جديد -->
+<div class="modal-overlay" id="addModal" onclick="closeAddModalOutside(event)">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>➕ إضافة مشترك جديد للسيستم</h2>
+            <button class="close-modal-btn" onclick="closeAddModal()">✕</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+            <input type="text" id="add-name" class="search-input" placeholder="اسم المشترك ثلاثي...">
+            <input type="text" id="add-phone" class="search-input" placeholder="رقم الموبايل...">
+            <input type="number" id="add-renew" class="search-input" placeholder="يوم التجديد في الشهر (مثلاً: 8)...">
+            <input type="number" id="add-price" class="search-input" placeholder="سعر باقة الاشتراك (مثلاً: 150)...">
+            <input type="number" id="add-debt" class="search-input" placeholder="ديون قديمة متأخرة عليه (إن وجد)...">
+            <button class="btn" style="background: #16a34a; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;" onclick="submitAddSubscriber()">حفظ وإضافة للسيستم</button>
+        </div>
+    </div>
+</div>
+
+<!-- موديول تعديل مشترك -->
+<div class="modal-overlay" id="editModal" onclick="closeEditModalOutside(event)">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2>✏️ تعديل بيانات العميل</h2>
+            <button class="close-modal-btn" onclick="closeEditModal()">✕</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+            <label style="font-size: 10px; font-weight: bold;">الاسم:</label>
+            <input type="text" id="edit-name" class="search-input">
+            
+            <label style="font-size: 10px; font-weight: bold;">رقم الهاتف:</label>
+            <input type="text" id="edit-phone" class="search-input">
+            
+            <label style="font-size: 10px; font-weight: bold;">يوم التجديد في الشهر:</label>
+            <input type="number" id="edit-renew" class="search-input">
+            
+            <label style="font-size: 10px; font-weight: bold;">سعر باقة الاشتراك:</label>
+            <input type="number" id="edit-price" class="search-input">
+            
+            <label style="font-size: 10px; font-weight: bold;">ديون قديمة مرحلة:</label>
+            <input type="number" id="edit-debt" class="search-input">
+
+            <label style="font-size: 10px; font-weight: bold;">المدفوع الفعلي هذا الشهر:</label>
+            <input type="number" id="edit-paid" class="search-input">
+            
+            <button class="btn" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;" onclick="submitEditSubscriber()">حفظ التعديلات الجديدة</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // 📊 لستة الـ 47 مشترك الأساسية بالبيانات والديون والأرقام
+    // 📊 لستة الـ 47 مشترك الأساسية بالبيانات والديون والأرقام الحقيقية[span_1](start_span)[span_1](end_span)
     const defaultSubscribers = [
         { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"] },
         { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"] },
@@ -266,20 +332,19 @@
     let subscribers = [];
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
 
-    // 🔄 استدعاء أو إنشاء البيانات في الذاكرة المحلية
     function initData() {
-        const stored = localStorage.getItem('local_subscribers');
+        const stored = localStorage.getItem('local_subscribers_pro');
         if (stored) {
             subscribers = JSON.parse(stored);
         } else {
-            subscribers = defaultSubscribers;
+            subscribers = defaultSubscribers; // تحميل اللستة الـ 47 الأساسية[span_2](start_span)[span_2](end_span)
             saveData();
         }
         render();
     }
 
     function saveData() {
-        localStorage.setItem('local_subscribers', JSON.stringify(subscribers));
+        localStorage.setItem('local_subscribers_pro', JSON.stringify(subscribers));
     }
 
     function getSubscriberStatus(sub) {
@@ -332,15 +397,14 @@
         updateCounters();
     }
 
-    // 🔄 تجديد الحسابات وترحيل المتبقي فوري وبدون أي نت!
     function autoRenewByDay(dayNumber) {
         if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
         
         subscribers.forEach(sub => {
             if (sub.renewDay === dayNumber) {
                 const { remaining } = getSubscriberStatus(sub);
-                sub.previousDebt = remaining; // ترحيل المتبقي للديون القديمة
-                sub.currentPaid = 0;          // تصفير المدفوع للشهر الجديد
+                sub.previousDebt = remaining; 
+                sub.currentPaid = 0;          
                 sub.history.push(`تجديد تلقائي. ديون مرحلة: ${remaining} ج`);
             }
         });
@@ -393,7 +457,6 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
-    // 💸 خصم وتخزين البيانات فوري وبدون أي نت!
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
@@ -402,10 +465,117 @@
         const sub = subscribers.find(s => s.id === id);
         if (sub) {
             sub.currentPaid += amount;
-            sub.history.push(`تم دفع ${amount} ج في تاريخ اليوم`);
+            sub.history.push(`تم دفع ${amount} ج`);
             saveData();
             closeModal();
             render();
+        }
+    }
+
+    // ➕ إضافة مشترك جديد
+    function openAddSubscriberModal() {
+        document.getElementById('add-name').value = '';
+        document.getElementById('add-phone').value = '';
+        document.getElementById('add-renew').value = '';
+        document.getElementById('add-price').value = '';
+        document.getElementById('add-debt').value = '';
+        document.getElementById('addModal').style.display = 'flex';
+    }
+
+    function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
+    function closeAddModalOutside(e) { if(e.target.id === 'addModal') closeAddModal(); }
+
+    function submitAddSubscriber() {
+        const name = document.getElementById('add-name').value.trim();
+        const phone = document.getElementById('add-phone').value.trim();
+        const renew = parseInt(document.getElementById('add-renew').value);
+        const price = parseFloat(document.getElementById('add-price').value);
+        const debt = parseFloat(document.getElementById('add-debt').value) || 0;
+
+        if (!name || isNaN(renew) || isNaN(price)) {
+            alert("برجاء ملء البيانات الأساسية (الاسم، يوم التجديد، والباقة)!");
+            return;
+        }
+
+        const newId = subscribers.length > 0 ? Math.max(...subscribers.map(s => s.id)) + 1 : 1;
+        
+        subscribers.push({
+            id: newId,
+            name: name,
+            phone: phone,
+            renewDay: renew,
+            packagePrice: price,
+            previousDebt: debt,
+            currentPaid: 0,
+            history: ["تاريخ الإضافة للسيستم"]
+        });
+
+        saveData();
+        closeAddModal();
+        render();
+        alert(`تمت إضافة العميل [ ${name} ] للسيستم بنجاح! 🎉`);
+    }
+
+    // ✏️ تعديل بيانات مشترك
+    function openEditModalFromDetails() {
+        const sub = subscribers.find(s => s.id === activeSubId);
+        if(!sub) return;
+
+        document.getElementById('edit-name').value = sub.name;
+        document.getElementById('edit-phone').value = sub.phone;
+        document.getElementById('edit-renew').value = sub.renewDay;
+        document.getElementById('edit-price').value = sub.packagePrice;
+        document.getElementById('edit-debt').value = sub.previousDebt;
+        document.getElementById('edit-paid').value = sub.currentPaid;
+
+        closeModal(); // قفل صفحة التفاصيل أولاً
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
+    function closeEditModalOutside(e) { if(e.target.id === 'editModal') closeEditModal(); }
+
+    function submitEditSubscriber() {
+        const sub = subscribers.find(s => s.id === activeSubId);
+        if(!sub) return;
+
+        const name = document.getElementById('edit-name').value.trim();
+        const phone = document.getElementById('edit-phone').value.trim();
+        const renew = parseInt(document.getElementById('edit-renew').value);
+        const price = parseFloat(document.getElementById('edit-price').value);
+        const debt = parseFloat(document.getElementById('edit-debt').value) || 0;
+        const paid = parseFloat(document.getElementById('edit-paid').value) || 0;
+
+        if (!name || isNaN(renew) || isNaN(price)) {
+            alert("الاسم، يوم التجديد، والباقة بيانات إلزامية!");
+            return;
+        }
+
+        sub.name = name;
+        sub.phone = phone;
+        sub.renewDay = renew;
+        sub.packagePrice = price;
+        sub.previousDebt = debt;
+        sub.currentPaid = paid;
+        sub.history.push(`تم تعديل البيانات الأساسية يدوياً`);
+
+        saveData();
+        closeEditModal();
+        render();
+        alert("تم حفظ التعديلات بنجاح! ✏️");
+    }
+
+    // ❌ حذف مشترك نهائياً
+    function deleteActiveSubscriber() {
+        const sub = subscribers.find(s => s.id === activeSubId);
+        if(!sub) return;
+
+        if (confirm(`🚨 هل أنت متأكد من مسح العميل [ ${sub.name} ] نهائياً من السيستم؟ لا يمكن استرجاعه!`)) {
+            subscribers = subscribers.filter(s => s.id !== activeSubId);
+            saveData();
+            closeModal();
+            render();
+            alert("تم حذف العميل من السيستم بنجاح.");
         }
     }
 
@@ -454,7 +624,6 @@
 
     function handleSearch() { searchQuery = document.getElementById('searchInput').value; render(); }
 
-    // تشغيل الأبلكيشن وسحب البيانات من الذاكرة المحلية فوراً عند التحميل
     initData();
 </script>
 </body>
