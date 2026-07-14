@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين الاحترافية المستقرة</title>
+    <title>لوحة إدارة المشتركين الاحترافية</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -71,10 +71,16 @@
         .user-card.partial-paid::before { background: var(--warning); }
         .user-card.unpaid::before { background: var(--danger); }
         
-        .user-info-main h3 { font-size: 13px; font-weight: 700; color: var(--text-main); }
+        .user-info-main { flex: 1; }
+        .user-info-main h3 { font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; padding-left: 10px; }
+        .debt-outside-tag { font-size: 11px; font-weight: bold; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 6px; }
+        body.dark-mode .debt-outside-tag { background: #7f1d1d; color: #fca5a5; }
+        .no-debt-outside-tag { font-size: 11px; font-weight: bold; color: #16a34a; background: #dcfce7; padding: 2px 6px; border-radius: 6px; }
+        body.dark-mode .no-debt-outside-tag { background: #14532d; color: #86efac; }
+        
         .countdown-text { font-size: 10px; color: var(--text-sub); margin-top: 2px; display: block; }
         
-        .status-badge { font-size: 9px; padding: 2px 6px; border-radius: 6px; font-weight: 700; color: white; }
+        .status-badge { font-size: 9px; padding: 2px 6px; border-radius: 6px; font-weight: 700; color: white; margin-right: 8px; }
         .fully-paid .status-badge { background: var(--success); }
         .partial-paid .status-badge { background: var(--warning); }
         .unpaid .status-badge { background: var(--danger); }
@@ -144,7 +150,6 @@
             <button class="theme-toggle-btn" onclick="toggleTheme()">🌙 وضع الليل</button>
         </header>
 
-        <!-- 🔔 شريط التنبيهات للتجديدات اليومية -->
         <div class="notification-bar" id="notificationBar">
             <span id="notificationText">يوجد اليوم مشتركين تجديدهم اليوم!</span>
             <button class="notification-btn" onclick="filterByTodayRenewals()">عرض المشتركين 🔍</button>
@@ -157,14 +162,10 @@
             <input type="file" id="backupFile" style="display:none;" onchange="uploadBackup(event)">
         </div>
 
-        <div class="admin-bar">
-            <button class="admin-add-btn" style="background:#d97706;" onclick="sendGroupDebtReminders()">📢 تذكير جماعي بالديون لجميع المتأخرين (واتساب)</button>
-        </div>
-
         <div class="renew-days-bar">
             <button class="renew-day-btn" onclick="autoRenewByDay(8)">🔄 تجديد يوم 8</button>
-            <button class="renew-day-btn" onclick="autoRenewByDay(18)">🔄 تجديد يوم 18</button>
-            <button class="renew-day-btn" onclick="autoRenewByDay(20)">🔄 تجديد يوم 20</button>
+            <button class="renew-day-btn" onclick="autoRenewByDay(11)">🔄 تجديد يوم 11</button>
+            <button class="renew-day-btn" onclick="autoRenewByDay(25)">🔄 تجديد يوم 25</button>
         </div>
 
         <div class="search-container">
@@ -294,6 +295,11 @@
 
             <label style="font-size: 10px; font-weight: bold;">المدفوع الفعلي هذا الشهر:</label>
             <input type="number" id="edit-paid" class="search-input">
+
+            <label style="display: flex; align-items: center; gap: 6px; margin: 8px 0; font-weight: bold; color:#dc2626; cursor:pointer;">
+                <input type="checkbox" id="edit-disable-wa" style="width: 16px; height: 16px;">
+                ❌ إلغاء تفعيل تنبيهات الواتساب لهذا العميل (رقم ملهوش واتس)
+            </label>
             
             <button class="btn" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; width:100%;" onclick="submitEditSubscriber()">حفظ التعديلات الجديدة</button>
         </div>
@@ -301,57 +307,57 @@
 </div>
 
 <script>
-    const ADMIN_PIN = "5566"; // 🔐 رمز الحماية للإدارة والتعديلات
+    const ADMIN_PIN = "5566"; 
 
-    // لستة الـ 47 مشترك الأساسية[span_0](start_span)[span_0](end_span)
+    // لستة المشتركين الـ 47 الأساسية الموثقة[span_0](start_span)[span_0](end_span)
     const defaultSubscribers = [
-        { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"] },
-        { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"] },
-        { id: 3, name: "صبري ونيس", phone: "01001010100", renewDay: 15, packagePrice: 100, previousDebt: 100, currentPaid: 100, history: ["سداد عند البداية: 100 ج"] },
-        { id: 4, name: "عبد الله ميزان", phone: "01007579677", renewDay: 29, packagePrice: 140, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"] },
-        { id: 5, name: "تامر الميكانيكي", phone: "01062581056", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"] },
-        { id: 6, name: "فرج", phone: "01067996668", renewDay: 8, packagePrice: 120, previousDebt: 0, currentPaid: 100, history: ["سداد عند البداية: 100 ج"] },
-        { id: 7, name: "شعبان تبع هاني سعيد", phone: "01016547117", renewDay: 12, packagePrice: 100, previousDebt: 220, currentPaid: 46, history: ["سداد عند البداية: 46 ج"] },
-        { id: 8, name: "أم العربي", phone: "01022248592", renewDay: 8, packagePrice: 150, previousDebt: 220, currentPaid: 60, history: ["سداد عند البداية: 60 ج"] },
-        { id: 9, name: "محمد فوده", phone: "01062951069", renewDay: 8, packagePrice: 140, previousDebt: 150, currentPaid: 120, history: ["سداد عند البداية: 120 ج"] },
-        { id: 10, name: "أحمد عزام", phone: "01090967912", renewDay: 15, packagePrice: 120, previousDebt: 0, currentPaid: 60, history: ["سداد عند البداية: 60 ج"] },
-        { id: 11, name: "عوض صادرات", phone: "01022355009", renewDay: 18, packagePrice: 150, previousDebt: 100, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] },
-        { id: 12, name: "ماهر فلفل", phone: "01011157222", renewDay: 12, packagePrice: 150, previousDebt: 200, currentPaid: 145, history: ["سداد عند البداية: 145 ج"] },
-        { id: 13, name: "أحمد الجزار", phone: "01022225883", renewDay: 12, packagePrice: 150, previousDebt: 400, currentPaid: 44, history: ["سداد عند البداية: 44 ج"] },
-        { id: 14, name: "هيما", phone: "01009185556", renewDay: 10, packagePrice: 150, previousDebt: 120, currentPaid: 215, history: ["سداد عند البداية: 215 ج"] },
-        { id: 15, name: "حج صلاح", phone: "01062667291", renewDay: 10, packagePrice: 150, previousDebt: 140, currentPaid: 62, history: ["سداد عند البداية: 62 ج"] },
-        { id: 16, name: "سعيد خام", phone: "0100961186", renewDay: 8, packagePrice: 100, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] },
-        { id: 17, name: "أيمن فتحي", phone: "01002094299", renewDay: 8, packagePrice: 150, previousDebt: 160, currentPaid: 300, history: ["سداد عند البداية: 300 ج"] },
-        { id: 18, name: "خالد سلام", phone: "01027850269", renewDay: 8, packagePrice: 100, previousDebt: 250, currentPaid: 40, history: ["سداد عند البداية: 40 ج"] },
-        { id: 19, name: "صبري سالم", phone: "01010199225", renewDay: 8, packagePrice: 100, previousDebt: 100, currentPaid: 45, history: ["سداد عند البداية: 45 ج"] },
-        { id: 20, name: "إيهاب", phone: "01090550088", renewDay: 8, packagePrice: 150, previousDebt: 25, currentPaid: 0, history: [] },
-        { id: 21, name: "هاني سعيد", phone: "01023220449", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 24, history: ["سداد عند البداية: 24 ج"] },
-        { id: 22, name: "علي مخزن", phone: "01069062402", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 90, history: ["سداد عند البداية: 90 ج"] },
-        { id: 23, name: "محمد ممدوح", phone: "01015099448", renewDay: 8, packagePrice: 150, previousDebt: 0, currentPaid: 0, history: [] },
-        { id: 24, name: "خيري عيد", phone: "01062559171", renewDay: 11, packagePrice: 150, previousDebt: 85, currentPaid: 125, history: ["سداد عند البداية: 125 ج"] },
-        { id: 25, name: "نورا فنوش", phone: "01055556679", renewDay: 8, packagePrice: 100, previousDebt: 30, currentPaid: 85, history: ["سداد عند البداية: 85 ج"] },
-        { id: 26, name: "محمد خليل امن", phone: "01012912229", renewDay: 11, packagePrice: 100, previousDebt: 150, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] },
-        { id: 27, name: "سالم خس", phone: "01014445987", renewDay: 8, packagePrice: 150, previousDebt: 225, currentPaid: 225, history: ["سداد عند البداية: 225 ج"] },
-        { id: 28, name: "سعد فلفل", phone: "01091999512", renewDay: 15, packagePrice: 85, previousDebt: 120, currentPaid: 0, history: [] },
-        { id: 29, name: "عصام فلفل", phone: "01061110033", renewDay: 16, packagePrice: 120, previousDebt: 140, currentPaid: 90, history: ["سداد عند البداية: 90 ج"] },
-        { id: 30, name: "خيري فلفل", phone: "01032348502", renewDay: 8, packagePrice: 130, previousDebt: 140, currentPaid: 215, history: ["سداد عند البداية: 215 ج"] },
-        { id: 31, name: "هاني عبد النبي", phone: "0100856804", renewDay: 15, packagePrice: 150, previousDebt: 100, currentPaid: 45, history: ["سداد عند البداية: 45 ج"] },
-        { id: 32, name: "محمود فوزي", phone: "01061559128", renewDay: 12, packagePrice: 140, previousDebt: 100, currentPaid: 210, history: ["سداد عند البداية: 210 ج"] },
-        { id: 33, name: "محمود جويه", phone: "01064028626", renewDay: 12, packagePrice: 150, previousDebt: 140, currentPaid: 27, history: ["سداد عند البداية: 27 ج"] },
-        { id: 34, name: "جمعه ارض الموالح", phone: "01069245505", renewDay: 17, packagePrice: 150, previousDebt: 150, currentPaid: 85, history: ["سداد عند البداية: 85 ج"] },
-        { id: 35, name: "عصام الزلباني", phone: "01022296429", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 190, history: ["سداد عند البداية: 190 ج"] },
-        { id: 36, name: "أحمد عبد المقصود", phone: "01092308201", renewDay: 15, packagePrice: 150, previousDebt: 150, currentPaid: 85, history: ["سداد عند البداية: 85 ج"] },
-        { id: 37, name: "جمال حسن", phone: "0106461564", renewDay: 8, packagePrice: 150, previousDebt: 150, currentPaid: 150, history: ["سداد عند البداية: 150 ج"] },
-        { id: 38, name: "إيهاب عرفه امن", phone: "0102268015", renewDay: 15, packagePrice: 150, previousDebt: 150, currentPaid: 315, history: ["سداد عند البداية: 315 ج"] },
-        { id: 39, name: "هاني نجم", phone: "01062144662", renewDay: 25, packagePrice: 150, previousDebt: 150, currentPaid: 225, history: ["سداد عند البداية: 225 ج"] },
-        { id: 40, name: "كرم عفشه", phone: "01028757912", renewDay: 15, packagePrice: 150, previousDebt: 140, currentPaid: 24, history: ["سداد عند البداية: 24 ج"] },
-        { id: 41, name: "رزة", phone: "01068222606", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 0, history: [] },
-        { id: 42, name: "نادي", phone: "01067145559", renewDay: 24, packagePrice: 100, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"] },
-        { id: 43, name: "المهندس", phone: "01010061105", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] },
-        { id: 44, name: "نور صيانه", phone: "01015525585", renewDay: 16, packagePrice: 150, previousDebt: 140, currentPaid: 0, history: [] },
-        { id: 45, name: "احمد الفهيمي", phone: "01090299940", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 0, history: [] },
-        { id: 46, name: "تبع عادل المقاول", phone: "04942", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 460, history: ["سداد عند البداية: 460 ج"] },
-        { id: 47, name: "ابو محي", phone: "01025425511", renewDay: 12, packagePrice: 150, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] }
+        { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"], disableWA: false },
+        { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"], disableWA: false },
+        { id: 3, name: "صبري ونيس", phone: "01001010100", renewDay: 15, packagePrice: 100, previousDebt: 100, currentPaid: 100, history: ["سداد عند البداية: 100 ج"], disableWA: false },
+        { id: 4, name: "عبد الله ميزان", phone: "01007579677", renewDay: 29, packagePrice: 140, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"], disableWA: false },
+        { id: 5, name: "تامر الميكانيكي", phone: "01062581056", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"], disableWA: false },
+        { id: 6, name: "فرج", phone: "01067996668", renewDay: 8, packagePrice: 120, previousDebt: 0, currentPaid: 100, history: ["سداد عند البداية: 100 ج"], disableWA: false },
+        { id: 7, name: "شعبان تبع هاني سعيد", phone: "01016547117", renewDay: 12, packagePrice: 100, previousDebt: 220, currentPaid: 46, history: ["سداد عند البداية: 46 ج"], disableWA: false },
+        { id: 8, name: "أم العربي", phone: "01022248592", renewDay: 8, packagePrice: 150, previousDebt: 220, currentPaid: 60, history: ["سداد عند البداية: 60 ج"], disableWA: false },
+        { id: 9, name: "محمد فوده", phone: "01062951069", renewDay: 8, packagePrice: 140, previousDebt: 150, currentPaid: 120, history: ["سداد عند البداية: 120 ج"], disableWA: false },
+        { id: 10, name: "أحمد عزام", phone: "01090967912", renewDay: 15, packagePrice: 120, previousDebt: 0, currentPaid: 60, history: ["سداد عند البداية: 60 ج"], disableWA: false },
+        { id: 11, name: "عوض صادرات", phone: "01022355009", renewDay: 18, packagePrice: 150, previousDebt: 100, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false },
+        { id: 12, name: "ماهر فلفل", phone: "01011157222", renewDay: 12, packagePrice: 150, previousDebt: 200, currentPaid: 145, history: ["سداد عند البداية: 145 ج"], disableWA: false },
+        { id: 13, name: "أحمد الجزار", phone: "01022225883", renewDay: 12, packagePrice: 150, previousDebt: 400, currentPaid: 44, history: ["سداد عند البداية: 44 ج"], disableWA: false },
+        { id: 14, name: "هيما", phone: "01009185556", renewDay: 10, packagePrice: 150, previousDebt: 120, currentPaid: 215, history: ["سداد عند البداية: 215 ج"], disableWA: false },
+        { id: 15, name: "حج صلاح", phone: "01062667291", renewDay: 10, packagePrice: 150, previousDebt: 140, currentPaid: 62, history: ["سداد عند البداية: 62 ج"], disableWA: false },
+        { id: 16, name: "سعيد خام", phone: "0100961186", renewDay: 8, packagePrice: 100, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false },
+        { id: 17, name: "أيمن فتحي", phone: "01002094299", renewDay: 8, packagePrice: 150, previousDebt: 160, currentPaid: 300, history: ["سداد عند البداية: 300 ج"], disableWA: false },
+        { id: 18, name: "خالد سلام", phone: "01027850269", renewDay: 8, packagePrice: 100, previousDebt: 250, currentPaid: 40, history: ["سداد عند البداية: 40 ج"], disableWA: false },
+        { id: 19, name: "صبري سالم", phone: "01010199225", renewDay: 8, packagePrice: 100, previousDebt: 100, currentPaid: 45, history: ["سداد عند البداية: 45 ج"], disableWA: false },
+        { id: 20, name: "إيهاب", phone: "01090550088", renewDay: 8, packagePrice: 150, previousDebt: 25, currentPaid: 0, history: [], disableWA: false },
+        { id: 21, name: "هاني سعيد", phone: "01023220449", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 24, history: ["سداد عند البداية: 24 ج"], disableWA: false },
+        { id: 22, name: "علي مخزن", phone: "01069062402", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 90, history: ["سداد عند البداية: 90 ج"], disableWA: false },
+        { id: 23, name: "محمد ممدوح", phone: "01015099448", renewDay: 8, packagePrice: 150, previousDebt: 0, currentPaid: 0, history: [], disableWA: false },
+        { id: 24, name: "خيري عيد", phone: "01062559171", renewDay: 11, packagePrice: 150, previousDebt: 85, currentPaid: 125, history: ["سداد عند البداية: 125 ج"], disableWA: false },
+        { id: 25, name: "نورا فنوش", phone: "01055556679", renewDay: 8, packagePrice: 100, previousDebt: 30, currentPaid: 85, history: ["سداد عند البداية: 85 ج"], disableWA: false },
+        { id: 26, name: "محمد خليل امن", phone: "01012912229", renewDay: 11, packagePrice: 100, previousDebt: 150, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false },
+        { id: 27, name: "سالم خس", phone: "01014445987", renewDay: 8, packagePrice: 150, previousDebt: 225, currentPaid: 225, history: ["سداد عند البداية: 225 ج"], disableWA: false },
+        { id: 28, name: "سعد فلفل", phone: "01091999512", renewDay: 15, packagePrice: 85, previousDebt: 120, currentPaid: 0, history: [], disableWA: false },
+        { id: 29, name: "عصام فلفل", phone: "01061110033", renewDay: 16, packagePrice: 120, previousDebt: 140, currentPaid: 90, history: ["سداد عند البداية: 90 ج"], disableWA: false },
+        { id: 30, name: "خيري فلفل", phone: "01032348502", renewDay: 8, packagePrice: 130, previousDebt: 140, currentPaid: 215, history: ["سداد عند البداية: 215 ج"], disableWA: false },
+        { id: 31, name: "هاني عبد النبي", phone: "0100856804", renewDay: 15, packagePrice: 150, previousDebt: 100, currentPaid: 45, history: ["سداد عند البداية: 45 ج"], disableWA: false },
+        { id: 32, name: "محمود فوزي", phone: "01061559128", renewDay: 12, packagePrice: 140, previousDebt: 100, currentPaid: 210, history: ["سداد عند البداية: 210 ج"], disableWA: false },
+        { id: 33, name: "محمود جويه", phone: "01064028626", renewDay: 12, packagePrice: 150, previousDebt: 140, currentPaid: 27, history: ["سداد عند البداية: 27 ج"], disableWA: false },
+        { id: 34, name: "جمعه ارض الموالح", phone: "01069245505", renewDay: 17, packagePrice: 150, previousDebt: 150, currentPaid: 85, history: ["سداد عند البداية: 85 ج"], disableWA: false },
+        { id: 35, name: "عصام الزلباني", phone: "01022296429", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 190, history: ["سداد عند البداية: 190 ج"], disableWA: false },
+        { id: 36, name: "أحمد عبد المقصود", phone: "01092308201", renewDay: 15, packagePrice: 150, previousDebt: 150, currentPaid: 85, history: ["سداد عند البداية: 85 ج"], disableWA: false },
+        { id: 37, name: "جمال حسن", phone: "0106461564", renewDay: 8, packagePrice: 150, previousDebt: 150, currentPaid: 150, history: ["سداد عند البداية: 150 ج"], disableWA: false },
+        { id: 38, name: "إيهاب عرفه امن", phone: "0102268015", renewDay: 15, packagePrice: 150, previousDebt: 150, currentPaid: 315, history: ["سداد عند البداية: 315 ج"], disableWA: false },
+        { id: 39, name: "هاني نجم", phone: "01062144662", renewDay: 25, packagePrice: 150, previousDebt: 150, currentPaid: 225, history: ["سداد عند البداية: 225 ج"], disableWA: false },
+        { id: 40, name: "كرم عفشه", phone: "01028757912", renewDay: 15, packagePrice: 150, previousDebt: 140, currentPaid: 24, history: ["سداد عند البداية: 24 ج"], disableWA: false },
+        { id: 41, name: "رزة", phone: "01068222606", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 0, history: [], disableWA: false },
+        { id: 42, name: "نادي", phone: "01067145559", renewDay: 24, packagePrice: 100, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"], disableWA: false },
+        { id: 43, name: "المهندس", phone: "01010061105", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false },
+        { id: 44, name: "نور صيانه", phone: "01015525585", renewDay: 16, packagePrice: 150, previousDebt: 140, currentPaid: 0, history: [], disableWA: false },
+        { id: 45, name: "احمد الفهيمي", phone: "01090299940", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 0, history: [], disableWA: false },
+        { id: 46, name: "تبع عادل المقاول", phone: "04942", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 460, history: ["سداد عند البداية: 460 ج"], disableWA: false },
+        { id: 47, name: "ابو محي", phone: "01025425511", renewDay: 12, packagePrice: 150, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false }
     ];
 
     let subscribers = [];
@@ -364,11 +370,11 @@
             document.querySelector('.theme-toggle-btn').innerText = "☀️ وضع النهار";
         }
 
-        const stored = localStorage.getItem('local_subscribers_v6');
+        const stored = localStorage.getItem('local_subscribers_v7');
         if (stored) {
             subscribers = JSON.parse(stored);
         } else {
-            subscribers = defaultSubscribers;
+            subscribers = defaultSubscribers;[span_1](start_span)[span_1](end_span)
             saveData();
         }
         render();
@@ -376,7 +382,7 @@
     }
 
     function saveData() {
-        localStorage.setItem('local_subscribers_v6', JSON.stringify(subscribers));
+        localStorage.setItem('local_subscribers_v7', JSON.stringify(subscribers));
     }
 
     function toggleTheme() {
@@ -408,13 +414,16 @@
         
         const filtered = subscribers.filter(s => s.renewDay === todayDay);
         filtered.forEach(sub => {
-            const { status, statusText } = getSubscriberStatus(sub);
+            const { remaining, status, statusText } = getSubscriberStatus(sub);
             const card = document.createElement('div');
             card.className = `user-card ${status}`;
             card.setAttribute('onclick', `openSubscriberModal(${sub.id})`);
+            
+            const debtTag = remaining > 0 ? `<span class="debt-outside-tag">باقي عليه: ${remaining} ج</span>` : `<span class="no-debt-outside-tag">خالص ✅</span>`;
+
             card.innerHTML = `
                 <div class="user-info-main">
-                    <h3>${sub.name}</h3>
+                    <h3><span>${sub.name}</span> ${debtTag}</h3>
                     <span class="countdown-text">📅 تجديده اليوم (يوم ${sub.renewDay})</span>
                 </div>
                 <span class="status-badge">${statusText}</span>
@@ -447,6 +456,7 @@
         return { totalRequired, remaining, status, statusText };
     }
 
+    // تم تحديث جلب العدادات فوري
     function updateCounters() {
         document.getElementById('count-all').innerText = subscribers.length;
         document.getElementById('count-paid').innerText = subscribers.filter(s => getSubscriberStatus(s).status === 'fully-paid').length;
@@ -470,13 +480,16 @@
         if (filtered.length === 0) { listContainer.innerHTML = `<div class="no-results">لا يوجد نتائج للمطابقة.</div>`; return; }
 
         filtered.forEach(sub => {
-            const { status, statusText } = getSubscriberStatus(sub);
+            const { remaining, status, statusText } = getSubscriberStatus(sub);
             const card = document.createElement('div');
             card.className = `user-card ${status}`;
             card.setAttribute('onclick', `openSubscriberModal(${sub.id})`);
+            
+            const debtTag = remaining > 0 ? `<span class="debt-outside-tag">باقي عليه: ${remaining} ج</span>` : `<span class="no-debt-outside-tag">خالص ✅</span>`;
+
             card.innerHTML = `
                 <div class="user-info-main">
-                    <h3>${sub.name}</h3>
+                    <h3><span>${sub.name}</span> ${debtTag}</h3>
                     <span class="countdown-text">📅 ميعاد تجديده يوم ${sub.renewDay} في الشهر</span>
                 </div>
                 <span class="status-badge">${statusText}</span>
@@ -561,6 +574,12 @@
 
             const { remaining } = getSubscriberStatus(sub);
             
+            if (sub.disableWA) {
+                closeModal();
+                render();
+                return;
+            }
+
             const waMessage = `يا غالي، تم استلام مبلغ (${amount}) ج بنجاح بتاريخ ${timestamp.split(' - ')[0].replace('[','')}.
 • حساب باقتك الحالي: (${sub.packagePrice}) ج.
 • ديون قديمة متأخرة: (${sub.previousDebt}) ج.
@@ -580,27 +599,6 @@
 
             window.open(waUrl, '_blank');
         }
-    }
-
-    function sendGroupDebtReminders() {
-        if (!confirm("هل تريد تجميع كل العملاء المتبقي عليهم ديون حالياً وفتح رسائل تذكير الواتس لهم تباعاً؟")) return;
-        
-        const debtors = subscribers.filter(sub => getSubscriberStatus(sub).remaining > 0);
-        if (debtors.length === 0) {
-            alert("كل العملاء مسددين بالكامل ولا يوجد أي ديون حالياً! 🌸");
-            return;
-        }
-
-        debtors.forEach((sub, index) => {
-            setTimeout(() => {
-                const { remaining } = getSubscriberStatus(sub);
-                const msg = `يا غالي، حابين نذكرك أن متبقي عليك حساب الاشتراك بقيمة (${remaining}) ج. برجاء تصفية الحساب في أقرب وقت متاح لمتابعة الخدمة. شكراً لك! 🌸`;
-                let cleanPhone = sub.phone.toString();
-                if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) cleanPhone = '0' + cleanPhone;
-                
-                window.open(`https://wa.me/2${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-            }, index * 1000); 
-        });
     }
 
     function openAddSubscriberModal() {
@@ -639,7 +637,8 @@
             packagePrice: price,
             previousDebt: debt,
             currentPaid: 0,
-            history: [`${timestamp} تمت الإضافة للسيستم`]
+            history: [`${timestamp} تمت الإضافة للسيستم`],
+            disableWA: false
         });
 
         saveData();
@@ -659,6 +658,7 @@
         document.getElementById('edit-price').value = sub.packagePrice;
         document.getElementById('edit-debt').value = sub.previousDebt;
         document.getElementById('edit-paid').value = sub.currentPaid;
+        document.getElementById('edit-disable-wa').checked = sub.disableWA || false;
 
         document.getElementById('detailsModal').style.display = 'none'; 
         document.getElementById('editModal').style.display = 'flex';    
@@ -683,6 +683,7 @@
         const price = parseFloat(document.getElementById('edit-price').value);
         const debt = parseFloat(document.getElementById('edit-debt').value) || 0;
         const paid = parseFloat(document.getElementById('edit-paid').value) || 0;
+        const disableWA = document.getElementById('edit-disable-wa').checked;
 
         if (!name || isNaN(renew) || isNaN(price)) {
             alert("الاسم، يوم التجديد، والباقة بيانات إلزامية!");
@@ -696,7 +697,8 @@
         sub.packagePrice = price;
         sub.previousDebt = debt;
         sub.currentPaid = paid;
-        sub.history.push(`${timestamp} تعديل البيانات الأساسية يدوياً`);
+        sub.disableWA = disableWA;
+        sub.history.push(`${timestamp} تعديل البيانات والخيارات يدوياً`);
 
         saveData();
         closeEditModal();
