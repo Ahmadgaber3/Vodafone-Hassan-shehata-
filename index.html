@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين الاحترافية المربوطة</title>
+    <title>لوحة إدارة المشتركين الاحترافية</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -143,9 +143,7 @@
         </div>
 
         <div id="list-section" class="section-content active">
-            <div id="subscribersList" class="subscribers-list">
-                <div class="loading">جاري مزامنة الأسماء الحية بالملي من جوجل شيت... 🔄</div>
-            </div>
+            <div id="subscribersList" class="subscribers-list"></div>
         </div>
 
         <div id="vault-section" class="section-content">
@@ -214,38 +212,74 @@
 </div>
 
 <script>
-    // 🚀 الرابط الحقيقي الجديد المربوط بـ Apps Script مباشرة 🚀
-    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbylWLAffCuuAzc4zFrQbXspUEQYbaNu3D7bnI87KcXeEyWCEvYuEW86Ax6B-RkQUNCs/exec"; 
+    // 📊 لستة الـ 47 مشترك الأساسية بالبيانات والديون والأرقام
+    const defaultSubscribers = [
+        { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"] },
+        { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"] },
+        { id: 3, name: "صبري ونيس", phone: "01001010100", renewDay: 15, packagePrice: 100, previousDebt: 100, currentPaid: 100, history: ["سداد عند البداية: 100 ج"] },
+        { id: 4, name: "عبد الله ميزان", phone: "01007579677", renewDay: 29, packagePrice: 140, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"] },
+        { id: 5, name: "تامر الميكانيكي", phone: "01062581056", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"] },
+        { id: 6, name: "فرج", phone: "01067996668", renewDay: 8, packagePrice: 120, previousDebt: 0, currentPaid: 100, history: ["سداد عند البداية: 100 ج"] },
+        { id: 7, name: "شعبان تبع هاني سعيد", phone: "01016547117", renewDay: 12, packagePrice: 100, previousDebt: 220, currentPaid: 46, history: ["سداد عند البداية: 46 ج"] },
+        { id: 8, name: "أم العربي", phone: "01022248592", renewDay: 8, packagePrice: 150, previousDebt: 220, currentPaid: 60, history: ["سداد عند البداية: 60 ج"] },
+        { id: 9, name: "محمد فوده", phone: "01062951069", renewDay: 8, packagePrice: 140, previousDebt: 150, currentPaid: 120, history: ["سداد عند البداية: 120 ج"] },
+        { id: 10, name: "أحمد عزام", phone: "01090967912", renewDay: 15, packagePrice: 120, previousDebt: 0, currentPaid: 60, history: ["سداد عند البداية: 60 ج"] },
+        { id: 11, name: "عوض صادرات", phone: "01022355009", renewDay: 18, packagePrice: 150, previousDebt: 100, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] },
+        { id: 12, name: "ماهر فلفل", phone: "01011157222", renewDay: 12, packagePrice: 150, previousDebt: 200, currentPaid: 145, history: ["سداد عند البداية: 145 ج"] },
+        { id: 13, name: "أحمد الجزار", phone: "01022225883", renewDay: 12, packagePrice: 150, previousDebt: 400, currentPaid: 44, history: ["سداد عند البداية: 44 ج"] },
+        { id: 14, name: "هيما", phone: "01009185556", renewDay: 10, packagePrice: 150, previousDebt: 120, currentPaid: 215, history: ["سداد عند البداية: 215 ج"] },
+        { id: 15, name: "حج صلاح", phone: "01062667291", renewDay: 10, packagePrice: 150, previousDebt: 140, currentPaid: 62, history: ["سداد عند البداية: 62 ج"] },
+        { id: 16, name: "سعيد خام", phone: "0100961186", renewDay: 8, packagePrice: 100, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] },
+        { id: 17, name: "أيمن فتحي", phone: "01002094299", renewDay: 8, packagePrice: 150, previousDebt: 160, currentPaid: 300, history: ["سداد عند البداية: 300 ج"] },
+        { id: 18, name: "خالد سلام", phone: "01027850269", renewDay: 8, packagePrice: 100, previousDebt: 250, currentPaid: 40, history: ["سداد عند البداية: 40 ج"] },
+        { id: 19, name: "صبري سالم", phone: "01010199225", renewDay: 8, packagePrice: 100, previousDebt: 100, currentPaid: 45, history: ["سداد عند البداية: 45 ج"] },
+        { id: 20, name: "إيهاب", phone: "01090550088", renewDay: 8, packagePrice: 150, previousDebt: 25, currentPaid: 0, history: [] },
+        { id: 21, name: "هاني سعيد", phone: "01023220449", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 24, history: ["سداد عند البداية: 24 ج"] },
+        { id: 22, name: "علي مخزن", phone: "01069062402", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 90, history: ["سداد عند البداية: 90 ج"] },
+        { id: 23, name: "محمد ممدوح", phone: "01015099448", renewDay: 8, packagePrice: 150, previousDebt: 0, currentPaid: 0, history: [] },
+        { id: 24, name: "خيري عيد", phone: "01062559171", renewDay: 11, packagePrice: 150, previousDebt: 85, currentPaid: 125, history: ["سداد عند البداية: 125 ج"] },
+        { id: 25, name: "نورا فنوش", phone: "01055556679", renewDay: 8, packagePrice: 100, previousDebt: 30, currentPaid: 85, history: ["سداد عند البداية: 85 ج"] },
+        { id: 26, name: "محمد خليل امن", phone: "01012912229", renewDay: 11, packagePrice: 100, previousDebt: 150, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] },
+        { id: 27, name: "سالم خس", phone: "01014445987", renewDay: 8, packagePrice: 150, previousDebt: 225, currentPaid: 225, history: ["سداد عند البداية: 225 ج"] },
+        { id: 28, name: "سعد فلفل", phone: "01091999512", renewDay: 15, packagePrice: 85, previousDebt: 120, currentPaid: 0, history: [] },
+        { id: 29, name: "عصام فلفل", phone: "01061110033", renewDay: 16, packagePrice: 120, previousDebt: 140, currentPaid: 90, history: ["سداد عند البداية: 90 ج"] },
+        { id: 30, name: "خيري فلفل", phone: "01032348502", renewDay: 8, packagePrice: 130, previousDebt: 140, currentPaid: 215, history: ["سداد عند البداية: 215 ج"] },
+        { id: 31, name: "هاني عبد النبي", phone: "0100856804", renewDay: 15, packagePrice: 150, previousDebt: 100, currentPaid: 45, history: ["سداد عند البداية: 45 ج"] },
+        { id: 32, name: "محمود فوزي", phone: "01061559128", renewDay: 12, packagePrice: 140, previousDebt: 100, currentPaid: 210, history: ["سداد عند البداية: 210 ج"] },
+        { id: 33, name: "محمود جويه", phone: "01064028626", renewDay: 12, packagePrice: 150, previousDebt: 140, currentPaid: 27, history: ["سداد عند البداية: 27 ج"] },
+        { id: 34, name: "جمعه ارض الموالح", phone: "01069245505", renewDay: 17, packagePrice: 150, previousDebt: 150, currentPaid: 85, history: ["سداد عند البداية: 85 ج"] },
+        { id: 35, name: "عصام الزلباني", phone: "01022296429", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 190, history: ["سداد عند البداية: 190 ج"] },
+        { id: 36, name: "أحمد عبد المقصود", phone: "01092308201", renewDay: 15, packagePrice: 150, previousDebt: 150, currentPaid: 85, history: ["سداد عند البداية: 85 ج"] },
+        { id: 37, name: "جمال حسن", phone: "0106461564", renewDay: 8, packagePrice: 150, previousDebt: 150, currentPaid: 150, history: ["سداد عند البداية: 150 ج"] },
+        { id: 38, name: "إيهاب عرفه امن", phone: "0102268015", renewDay: 15, packagePrice: 150, previousDebt: 150, currentPaid: 315, history: ["سداد عند البداية: 315 ج"] },
+        { id: 39, name: "هاني نجم", phone: "01062144662", renewDay: 25, packagePrice: 150, previousDebt: 150, currentPaid: 225, history: ["سداد عند البداية: 225 ج"] },
+        { id: 40, name: "كرم عفشه", phone: "01028757912", renewDay: 15, packagePrice: 150, previousDebt: 140, currentPaid: 24, history: ["سداد عند البداية: 24 ج"] },
+        { id: 41, name: "رزة", phone: "01068222606", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 0, history: [] },
+        { id: 42, name: "نادي", phone: "01067145559", renewDay: 24, packagePrice: 100, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"] },
+        { id: 43, name: "المهندس", phone: "01010061105", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] },
+        { id: 44, name: "نور صيانه", phone: "01015525585", renewDay: 16, packagePrice: 150, previousDebt: 140, currentPaid: 0, history: [] },
+        { id: 45, name: "احمد الفهيمي", phone: "01090299940", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 0, history: [] },
+        { id: 46, name: "تبع عادل المقاول", phone: "04942", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 460, history: ["سداد عند البداية: 460 ج"] },
+        { id: 47, name: "ابو محي", phone: "01025425511", renewDay: 12, packagePrice: 150, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"] }
+    ];
 
     let subscribers = [];
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
 
-    async function loadData() {
-        const listContainer = document.getElementById('subscribersList');
-        try {
-            const response = await fetch(SHEET_API_URL);
-            const dataFromSheet = await response.json();
-            
-            if (dataFromSheet && dataFromSheet.length > 0) {
-                // ميكانيزم القراءة المستقر 100% المعتمد على المصفوفات
-                subscribers = dataFromSheet.slice(1).map((item, index) => {
-                    const vals = Object.values(item);
-                    return {
-                        id: parseInt(vals[0]) || (index + 1), 
-                        name: vals[1] || "اسم غير مسجل",         
-                        phone: vals[2] || "",                 
-                        renewDay: parseInt(vals[3]) || 8,     
-                        packagePrice: parseFloat(vals[4]) || 0, 
-                        previousDebt: parseFloat(vals[5]) || 0, 
-                        currentPaid: parseFloat(vals[6]) || 0,  
-                        history: vals[7] ? (vals[7].toString().startsWith('[') ? JSON.parse(vals[7]) : [vals[7]]) : [] 
-                    };
-                });
-                render();
-            }
-        } catch (error) {
-            listContainer.innerHTML = `<div class="no-results" style="color:red;">❌ خطأ في سحب البيانات الحية. تأكد من فتح صلاحية "Anyone with link" في الشيت ومسح كاش المتصفح!</div>`;
+    // 🔄 استدعاء أو إنشاء البيانات في الذاكرة المحلية
+    function initData() {
+        const stored = localStorage.getItem('local_subscribers');
+        if (stored) {
+            subscribers = JSON.parse(stored);
+        } else {
+            subscribers = defaultSubscribers;
+            saveData();
         }
+        render();
+    }
+
+    function saveData() {
+        localStorage.setItem('local_subscribers', JSON.stringify(subscribers));
     }
 
     function getSubscriberStatus(sub) {
@@ -269,7 +303,6 @@
 
     function render() {
         const listContainer = document.getElementById('subscribersList');
-        if (subscribers.length === 0) return;
         listContainer.innerHTML = '';
         
         if (currentTab === 'vault') return;
@@ -299,23 +332,22 @@
         updateCounters();
     }
 
-    async function autoRenewByDay(dayNumber) {
+    // 🔄 تجديد الحسابات وترحيل المتبقي فوري وبدون أي نت!
+    function autoRenewByDay(dayNumber) {
         if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
-        document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري ترحيل الديون وتحديث جوجل شيت... 🔄</div>`;
         
-        try {
-            await fetch(SHEET_API_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: "renew", day: dayNumber })
-            });
-            closeModal();
-            setTimeout(loadData, 1500); 
-        } catch (e) {
-            closeModal();
-            setTimeout(loadData, 1500);
-        }
+        subscribers.forEach(sub => {
+            if (sub.renewDay === dayNumber) {
+                const { remaining } = getSubscriberStatus(sub);
+                sub.previousDebt = remaining; // ترحيل المتبقي للديون القديمة
+                sub.currentPaid = 0;          // تصفير المدفوع للشهر الجديد
+                sub.history.push(`تجديد تلقائي. ديون مرحلة: ${remaining} ج`);
+            }
+        });
+        
+        saveData();
+        render();
+        alert(`تم تجديد وترحيل ديون جميع مشتركين يوم ${dayNumber} بنجاح! 🚀`);
     }
 
     function openSubscriberModal(id) {
@@ -324,11 +356,7 @@
         if(!sub) return;
         
         const { remaining } = getSubscriberStatus(sub);
-        
         let cleanPhone = sub.phone.toString();
-        if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
-            cleanPhone = '0' + cleanPhone;
-        }
 
         document.getElementById('m-name').innerText = sub.name;
         document.getElementById('m-renew-day').innerText = `يوم ${sub.renewDay} في الشهر`;
@@ -365,28 +393,19 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
-    async function submitModalPayment(id) {
+    // 💸 خصم وتخزين البيانات فوري وبدون أي نت!
+    function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
 
-        const payBtn = document.getElementById('m-pay-btn');
-        payBtn.innerText = "جاري الحفظ...";
-        
-        try {
-            await fetch(SHEET_API_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ action: "pay", id: id, amount: amount })
-            });
+        const sub = subscribers.find(s => s.id === id);
+        if (sub) {
+            sub.currentPaid += amount;
+            sub.history.push(`تم دفع ${amount} ج في تاريخ اليوم`);
+            saveData();
             closeModal();
-            setTimeout(loadData, 1500); 
-        } catch (e) {
-            closeModal();
-            setTimeout(loadData, 1500);
-        } finally {
-            payBtn.innerText = "دفع الآن";
+            render();
         }
     }
 
@@ -435,7 +454,8 @@
 
     function handleSearch() { searchQuery = document.getElementById('searchInput').value; render(); }
 
-    loadData();
+    // تشغيل الأبلكيشن وسحب البيانات من الذاكرة المحلية فوراً عند التحميل
+    initData();
 </script>
 </body>
 </html>
