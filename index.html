@@ -156,7 +156,6 @@
             <button class="theme-toggle-btn" onclick="toggleTheme()">🌙 وضع الليل</button>
         </header>
 
-        <!-- 📲 شريط التثبيت الفوري التلقائي المكتمل -->
         <div class="pwa-install-bar" id="pwaInstallBar">
             <span>✨ ثبت التطبيق على شاشتك الرئيسية الآن:</span>
             <button class="pwa-btn" id="pwaInstallBtn">📲 تثبيت</button>
@@ -321,7 +320,7 @@
 <script>
     const ADMIN_PIN = "5566"; 
 
-    // لستة المشتركين الـ 47 الأساسية الموثقة بالبيانات والديون[span_1](start_span)[span_1](end_span)
+    // لستة المشتركين الـ 47 الأساسية الموثقة[span_0](start_span)[span_0](end_span)
     const defaultSubscribers = [
         { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"], disableWA: false },
         { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"], disableWA: false },
@@ -377,7 +376,6 @@
     let deferredPrompt = null; 
 
     function initData() {
-        // 📡 تسجيل الـ Service Worker في الخلفية للتثبيت المستقر
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').then(() => console.log("PWA Active!"));
         }
@@ -392,18 +390,16 @@
         if (stored) {
             subscribers = JSON.parse(stored);
         } else {
-            subscribers = defaultSubscribers;[span_2](start_span)[span_2](end_span)
+            subscribers = defaultSubscribers;[span_1](start_span)[span_1](end_span)
             saveData();
         }
         render();
         checkTodayRenewals(); 
     }
 
-    // ⚡ ميكانيزم التقاط حدث التثبيت التلقائي من المتصفح
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
-        // إظهار شريط التحصيل والتثبيت تحت العنوان فوراً
         document.getElementById('pwaInstallBar').style.display = 'flex';
     });
 
@@ -412,7 +408,7 @@
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
         if (outcome === 'accepted') {
-            document.getElementById('pwaInstallBar').style.display = 'none'; // الكلمة والشريط بيطيروا فوري
+            document.getElementById('pwaInstallBar').style.display = 'none'; 
         }
         deferredPrompt = null;
     });
@@ -453,7 +449,11 @@
         const listContainer = document.getElementById('subscribersList');
         listContainer.innerHTML = '';
         
-        const filtered = subscribers.filter(s => s.renewDay === todayDay);
+        // تصفية مشتركين اليوم وترتيبهم بردو من أكبر دين لأقل دين
+        const filtered = subscribers.filter(s => s.renewDay === todayDay).sort((a, b) => {
+            return getSubscriberStatus(b).remaining - getSubscriberStatus(a).remaining;
+        });
+
         filtered.forEach(sub => {
             const { remaining, status, statusText } = getSubscriberStatus(sub);
             const card = document.createElement('div');
@@ -518,6 +518,11 @@
 
         if (searchQuery.trim() !== '') filtered = filtered.filter(s => s.name.toString().includes(searchQuery.trim()));
         if (filtered.length === 0) { listContainer.innerHTML = `<div class="no-results">لا يوجد نتائج للمطابقة.</div>`; return; }
+
+        // 🔄 سحر الترتيب: فرز المصفوفة تنازلياً من أكبر متبقي لأقل متبقي 🔄
+        filtered.sort((a, b) => {
+            return getSubscriberStatus(b).remaining - getSubscriberStatus(a).remaining;
+        });
 
         filtered.forEach(sub => {
             const { remaining, status, statusText } = getSubscriberStatus(sub);
@@ -760,6 +765,7 @@
         }
     }
 
+    // 📥 تحميل نسخة احتياطية من البيانات على جهازك
     function downloadBackup() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(subscribers));
         const downloadAnchor = document.createElement('a');
@@ -775,6 +781,7 @@
         document.getElementById('backupFile').click();
     }
 
+    // 📤 رفع نسخة احتياطية للسيستم
     function uploadBackup(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -833,6 +840,7 @@
         else { document.getElementById('v-cash').innerText = "****"; document.getElementById('v-old-debts').innerText = "****"; document.getElementById('v-current-debt').innerText = "****"; }
     }
 
+    // تبديل التبويبات
     function switchTab(tabName) {
         currentTab = tabName;
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
