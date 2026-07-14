@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين الاحترافية الشاملة</title>
+    <title>لوحة إدارة المشتركين المؤمنة بالكامل</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -31,8 +31,7 @@
 
         .renew-days-bar { display: flex; gap: 4px; margin-bottom: 8px; }
         .renew-day-btn { flex: 1; background: #0f172a; color: white; border: none; padding: 8px 4px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
-        .renew-day-btn:active { transform: scale(0.97); }
-
+        
         .tabs { display: flex; background: #cbd5e1; padding: 2px; border-radius: var(--radius); margin-bottom: 8px; gap: 2px; }
         .tab-btn { flex: 1; padding: 6px 4px; border: none; background: none; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-main); border-radius: 10px; display: flex; flex-direction: column; align-items: center; }
         .tab-btn span.count { font-size: 9px; background: #f1f5f9; padding: 1px 5px; border-radius: 20px; color: var(--text-main); margin-top: 2px; }
@@ -54,7 +53,6 @@
         .user-card.partial-paid::before { background: var(--warning); }
         .user-card.unpaid::before { background: var(--danger); }
         
-        .user-card:active { transform: scale(0.97); }
         .user-info-main h3 { font-size: 13px; font-weight: 700; color: #1e293b; }
         .countdown-text { font-size: 10px; color: var(--text-sub); margin-top: 2px; display: block; }
         
@@ -113,11 +111,10 @@
         
         .eye-btn { width: 100%; background: #334155; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
         .no-results { text-align: center; padding: 20px; color: var(--text-sub); background: white; border-radius: var(--radius); }
-        .loading { text-align: center; padding: 20px; font-weight: bold; color: #2563eb; background: white; border-radius: var(--radius); }
         
-        .admin-bar { display: flex; margin-bottom: 8px; }
-        .admin-add-btn { width: 100%; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .admin-add-btn:active { transform: scale(0.97); }
+        .admin-bar { display: flex; gap: 4px; margin-bottom: 8px; }
+        .admin-add-btn { flex: 2; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .backup-btn { flex: 1; background: #475569; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -128,14 +125,18 @@
             <h1>نظام إدارة المشتركين والاتصالات</h1>
         </header>
 
+        <!-- شريط الإدارة والنسخ الاحتياطي السحري -->
         <div class="admin-bar">
-            <button class="admin-add-btn" onclick="openAddSubscriberModal()">➕ إضافة مشترك جديد للسيستم</button>
+            <button class="admin-add-btn" onclick="openAddSubscriberModal()">➕ إضافة مشترك جديد</button>
+            <button class="backup-btn" onclick="downloadBackup()">📥 نسخ احتياطي</button>
+            <button class="backup-btn" style="background:#0f172a;" onclick="triggerUploadBackup()">📤 استعادة</button>
+            <input type="file" id="backupFile" style="display:none;" onchange="uploadBackup(event)">
         </div>
 
         <div class="renew-days-bar">
-            <button class="renew-day-btn" onclick="autoRenewByDay(8)">🔄 تجديد مشتركين يوم 8</button>
-            <button class="renew-day-btn" onclick="autoRenewByDay(18)">🔄 تجديد مشتركين يوم 18</button>
-            <button class="renew-day-btn" onclick="autoRenewByDay(20)">🔄 تجديد مشتركين يوم 20</button>
+            <button class="renew-day-btn" onclick="autoRenewByDay(8)">🔄 تجديد يوم 8</button>
+            <button class="renew-day-btn" onclick="autoRenewByDay(18)">🔄 تجديد يوم 18</button>
+            <button class="renew-day-btn" onclick="autoRenewByDay(20)">🔄 تجديد يوم 20</button>
         </div>
 
         <div class="search-container">
@@ -272,7 +273,8 @@
 </div>
 
 <script>
-    // 📊 لستة الـ 47 مشترك الأساسية بالبيانات والديون والأرقام الحقيقية[span_0](start_span)[span_0](end_span)
+    const ADMIN_PIN = "5566"; // 🔐 رمز الحماية للإدارة والتعديلات
+
     const defaultSubscribers = [
         { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"] },
         { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"] },
@@ -327,18 +329,29 @@
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
 
     function initData() {
-        const stored = localStorage.getItem('local_subscribers_pro');
+        const stored = localStorage.getItem('local_subscribers_pro_sec');
         if (stored) {
             subscribers = JSON.parse(stored);
         } else {
-            subscribers = defaultSubscribers;
+            subscribers = defaultSubscribers;[span_1](start_span)[span_1](end_span)
             saveData();
         }
         render();
     }
 
     function saveData() {
-        localStorage.setItem('local_subscribers_pro', JSON.stringify(subscribers));
+        localStorage.setItem('local_subscribers_pro_sec', JSON.stringify(subscribers));
+    }
+
+    // 🔒 دالة التحقق من رمز الإدارة السري
+    function checkAdminAuth() {
+        const pin = prompt("🔐 برجاء إدخال رمز الإدارة السري للمتابعة:");
+        if (pin === ADMIN_PIN) {
+            return true;
+        } else {
+            alert("❌ رمز حماية خاطئ! لا يمكنك التعديل.");
+            return false;
+        }
     }
 
     function getSubscriberStatus(sub) {
@@ -392,6 +405,7 @@
     }
 
     function autoRenewByDay(dayNumber) {
+        if (!checkAdminAuth()) return; // حماية
         if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
         
         subscribers.forEach(sub => {
@@ -466,6 +480,7 @@
     }
 
     function openAddSubscriberModal() {
+        if (!checkAdminAuth()) return; // حماية
         document.getElementById('add-name').value = '';
         document.getElementById('add-phone').value = '';
         document.getElementById('add-renew').value = '';
@@ -508,12 +523,11 @@
         alert(`تمت إضافة العميل [ ${name} ] للسيستم بنجاح! 🎉`);
     }
 
-    // ✏️ تم تصليح وتأمين جلب المعرف لضمان الحفظ الفوري
     function openEditModalFromDetails() {
+        if (!checkAdminAuth()) return; // حماية
         const sub = subscribers.find(s => s.id === activeSubId);
         if(!sub) return;
 
-        // تعبئة البيانات في المودال الجديد
         document.getElementById('edit-name').value = sub.name;
         document.getElementById('edit-phone').value = sub.phone;
         document.getElementById('edit-renew').value = sub.renewDay;
@@ -521,8 +535,8 @@
         document.getElementById('edit-debt').value = sub.previousDebt;
         document.getElementById('edit-paid').value = sub.currentPaid;
 
-        document.getElementById('detailsModal').style.display = 'none'; // قفل تفاصيل العميل بس
-        document.getElementById('editModal').style.display = 'flex';    // فتح تعديل البيانات
+        document.getElementById('detailsModal').style.display = 'none'; 
+        document.getElementById('editModal').style.display = 'flex';    
     }
 
     function closeEditModal() { 
@@ -532,10 +546,9 @@
     function closeEditModalOutside(e) { if(e.target.id === 'editModal') closeEditModal(); }
 
     function submitEditSubscriber() {
-        // البحث بالمعرف المثبت والنشط حالياً
         const sub = subscribers.find(s => s.id === activeSubId);
         if(!sub) {
-            alert("خطأ: لم يتم تحديد المشترك بشكل صحيح!");
+            alert("خطأ في تحديد المشترك!");
             return;
         }
 
@@ -551,7 +564,6 @@
             return;
         }
 
-        // تحديث الداتا في المصفوفة
         sub.name = name;
         sub.phone = phone;
         sub.renewDay = renew;
@@ -567,6 +579,7 @@
     }
 
     function deleteActiveSubscriber() {
+        if (!checkAdminAuth()) return; // حماية
         const sub = subscribers.find(s => s.id === activeSubId);
         if(!sub) return;
 
@@ -577,6 +590,46 @@
             render();
             alert("تم حذف العميل من السيستم بنجاح.");
         }
+    }
+
+    // 📥 دالة تحميل نسخة احتياطية من البيانات على جهازك
+    function downloadBackup() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(subscribers));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `نسخة_احتياطية_المشتركين_${new Date().toISOString().slice(0,10)}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+    }
+
+    function triggerUploadBackup() {
+        if (!checkAdminAuth()) return; // حماية
+        document.getElementById('backupFile').click();
+    }
+
+    // 📤 دالة رفع واستعادة نسخة احتياطية للسيستم فوري
+    function uploadBackup(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const parsed = JSON.parse(e.target.result);
+                if (Array.isArray(parsed)) {
+                    subscribers = parsed;
+                    saveData();
+                    render();
+                    alert("📊 تم استعادة وتحميل النسخة الاحتياطية بنجاح 100%!");
+                } else {
+                    alert("الملف غير صالح أو تالف!");
+                }
+            } catch (err) {
+                alert("خطأ في قراءة ملف النسخة الاحتياطية!");
+            }
+        };
+        reader.readAsText(file);
     }
 
     function unlockVault() {
