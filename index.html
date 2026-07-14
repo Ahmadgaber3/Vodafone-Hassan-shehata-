@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين المؤمنة بالتاريخ الفوري</title>
+    <title>لوحة إدارة المشتركين المؤمنة بالتاريخ والواتساب التلقائي</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -329,7 +329,7 @@
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
 
     function initData() {
-        const stored = localStorage.getItem('local_subscribers_pro_sec_v3');
+        const stored = localStorage.getItem('local_subscribers_pro_sec_v4');
         if (stored) {
             subscribers = JSON.parse(stored);
         } else {
@@ -340,7 +340,7 @@
     }
 
     function saveData() {
-        localStorage.setItem('local_subscribers_pro_sec_v3', JSON.stringify(subscribers));
+        localStorage.setItem('local_subscribers_pro_sec_v4', JSON.stringify(subscribers));
     }
 
     function checkAdminAuth() {
@@ -353,7 +353,6 @@
         }
     }
 
-    // 🕒 دالة سحرية لجلب التاريخ والوقت المنسق بالملي فوري حسب توقيت جهازك
     function getFormattedDateTime() {
         const now = new Date();
         const y = now.getFullYear();
@@ -363,7 +362,7 @@
         const mins = now.getMinutes().toString().padStart(2, '0');
         const ampm = hours >= 12 ? 'م' : 'ص';
         hours = hours % 12;
-        hours = hours ? hours : 12; // الساعة 0 تصبح 12
+        hours = hours ? hours : 12;
         return `[${d}/${m}/${y} - ${hours}:${mins} ${ampm}]`;
     }
 
@@ -478,6 +477,7 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
     }
 
+    // 🚀 دالة تسجيل الدفع وتوجيه الواتساب التلقائي بالبيانات 🚀
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); 
         const amount = parseFloat(input.value);
@@ -485,12 +485,38 @@
 
         const sub = subscribers.find(s => s.id === id);
         if (sub) {
-            const timestamp = getFormattedDateTime(); // جلب التاريخ الحالي والوقت بالدقيقة
+            const timestamp = getFormattedDateTime();
+            
+            // 1. تحديث المدفوعات وحفظ الداتا محلياً
             sub.currentPaid += amount;
-            sub.history.push(`${timestamp} دفع: ${amount} ج`); // تسجيل التاريخ بدقة مع الدفعة
+            sub.history.push(`${timestamp} دفع: ${amount} ج`);
             saveData();
+
+            // 2. حساب المتبقي النهائي لإرساله في الرسالة
+            const { remaining } = getSubscriberStatus(sub);
+            
+            // 3. صياغة نص رسالة الواتس الاحترافية
+            const waMessage = `يا غالي، تم استلام مبلغ (${amount}) ج بنجاح بتاريخ ${timestamp.split(' - ')[0].replace('[','')}.
+• حساب باقتك الحالي: (${sub.packagePrice}) ج.
+• ديون قديمة متأخرة: (${sub.previousDebt}) j.
+• إجمالي المدفوع هذا الشهر: (${sub.currentPaid}) ج.
+*المتبقي النهائي عليك حالياً: (${remaining}) ج.*
+شكراً لتعاملك معنا! 🌸`;
+
+            // 4. تنظيف رقم التليفون لفتح الواتساب
+            let cleanPhone = sub.phone.toString();
+            if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
+                cleanPhone = '0' + cleanPhone;
+            }
+
+            // 5. التوجيه التلقائي المباشر للواتس بالرسالة المكتوبة
+            const waUrl = `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
+            
             closeModal();
             render();
+
+            // فتح الواتساب تلقائياً في نافذة جديدة
+            window.open(waUrl, '_blank');
         }
     }
 
@@ -651,7 +677,7 @@
             }
         };
         reader.readAsText(file);
-        event.target.value = ''; // تصفير لتسهيل الرفع المتكرر
+        event.target.value = ''; 
     }
 
     function unlockVault() {
