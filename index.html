@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين - النسخة الأصلية المستقرة</title>
+    <title>لوحة إدارة المشتركين الاحترافية المربوطة</title>
     <style>
         :root {
             --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -18,76 +18,122 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg); color: var(--text-main); padding: 8px; font-size: 12px; min-height: 100vh; }
+        body { background-color: var(--bg); color: var(--text-main); padding: 8px; font-size: 12px; position: relative; min-height: 100vh; }
+        
         body.modal-open .main-content { filter: blur(6px); pointer-events: none; }
         .container { max-width: 430px; margin: 0 auto; }
+        
         header { text-align: center; margin: 6px 0 10px 0; }
         header h1 { font-size: 15px; font-weight: 800; color: #1e3a8a; }
+        
         .search-container { margin-bottom: 8px; }
         .search-input { width: 100%; padding: 8px 12px; border-radius: var(--radius); border: 1px solid #cbd5e1; font-size: 12px; outline: none; }
+
         .renew-days-bar { display: flex; gap: 4px; margin-bottom: 8px; }
         .renew-day-btn { flex: 1; background: #0f172a; color: white; border: none; padding: 8px 4px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
+        .renew-day-btn:active { transform: scale(0.97); }
+
         .tabs { display: flex; background: #cbd5e1; padding: 2px; border-radius: var(--radius); margin-bottom: 8px; gap: 2px; }
         .tab-btn { flex: 1; padding: 6px 4px; border: none; background: none; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-main); border-radius: 10px; display: flex; flex-direction: column; align-items: center; }
         .tab-btn span.count { font-size: 9px; background: #f1f5f9; padding: 1px 5px; border-radius: 20px; color: var(--text-main); margin-top: 2px; }
+        
         .tab-btn.active { background: #2563eb; color: white; }
+        .tab-btn.active span.count { background: rgba(255, 255, 255, 0.3); color: white; }
+        
         .tab-btn.vault-tab { color: #b45309; font-weight: 800; }
         .tab-btn.vault-tab.active { background: #d97706; color: white; }
+
         .section-content { display: none; }
         .section-content.active { display: block; }
+
         .subscribers-list { display: flex; flex-direction: column; gap: 6px; }
-        .user-card { background: var(--card-bg); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        .user-card { background: var(--card-bg); border-radius: var(--radius); padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.05); position: relative; overflow: hidden; z-index: 1; }
+        
         .user-card::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 5px; background: #cbd5e1; }
         .user-card.fully-paid::before { background: var(--success); }
         .user-card.partial-paid::before { background: var(--warning); }
         .user-card.unpaid::before { background: var(--danger); }
+        
+        .user-card:active { transform: scale(0.97); }
         .user-info-main h3 { font-size: 13px; font-weight: 700; color: #1e293b; }
         .countdown-text { font-size: 10px; color: var(--text-sub); margin-top: 2px; display: block; }
+        
         .status-badge { font-size: 9px; padding: 2px 6px; border-radius: 6px; font-weight: 700; color: white; }
         .fully-paid .status-badge { background: var(--success); }
         .partial-paid .status-badge { background: var(--warning); }
         .unpaid .status-badge { background: var(--danger); }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; padding: 16px; z-index: 9999; }
-        .modal-card { background: #ffffff; width: 100%; max-width: 380px; border-radius: 16px; padding: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); position: relative; }
+
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); 
+            display: none; justify-content: center; align-items: center; 
+            padding: 16px; z-index: 9999; 
+        }
+        
+        .modal-card { 
+            background: #ffffff; width: 100%; max-width: 380px; 
+            border-radius: 16px; padding: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
+            animation: fadeInCenter 0.2s ease-out; position: relative;
+        }
+        
+        @keyframes fadeInCenter { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
-        .close-modal-btn { background: #f1f5f9; border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .modal-header h2 { font-size: 14px; font-weight: 800; }
+        .close-modal-btn { background: #f1f5f9; border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
         .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
         .detail-item { background: #f8fafc; padding: 6px 8px; border-radius: 8px; border: 1px solid #f1f5f9; }
-        .detail-item span { display: block; font-size: 9px; color: var(--text-sub); }
+        .detail-item span { display: block; font-size: 9px; color: var(--text-sub); margin-bottom: 1px; }
         .detail-item strong { color: var(--text-main); font-size: 13px; font-weight: 700; }
+
         .actions-row { display: flex; gap: 6px; margin-bottom: 8px; }
-        .action-link { flex: 1; text-decoration: none; text-align: center; padding: 8px; border-radius: 8px; font-weight: 700; color: white; display: flex; justify-content: center; align-items: center; }
+        .action-link { flex: 1; text-decoration: none; text-align: center; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; color: white; }
         .btn-call { background: #16a34a; }
         .btn-whatsapp { background: #25d366; }
+
         .payment-action { display: flex; gap: 4px; margin-bottom: 6px; }
-        .payment-input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
-        .submit-pay-btn { background: #2563eb; color: white; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; }
-        .cash-calc-box { background: #fff7ed; padding: 6px; border-radius: 8px; border: 1px solid #ffedd5; display: flex; justify-content: space-between; }
-        .history-box { background: #f8fafc; padding: 6px 8px; border-radius: 8px; max-height: 80px; overflow-y: auto; font-size: 10px; color: #475569; margin-top: 6px; }
+        .payment-input { flex: 1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 11px; }
+        .submit-pay-btn { background: #2563eb; color: white; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px; }
+
+        .cash-calc-box { background: #fff7ed; padding: 6px; border-radius: 8px; border: 1px solid #ffedd5; display: flex; justify-content: space-between; align-items: center; font-size: 10px; margin-bottom: 8px; }
+        .history-box { background: #f8fafc; padding: 6px 8px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px; max-height: 80px; overflow-y: auto; }
+        .history-title { font-weight: 700; color: var(--text-sub); margin-bottom: 4px; }
+        .timeline-item { position: relative; padding-right: 12px; margin-bottom: 4px; color: #475569; font-size: 10px; }
+        .timeline-item::before { content: ''; position: absolute; right: 2px; top: 4px; width: 5px; height: 5px; background: #cbd5e1; border-radius: 50%; }
+
         .vault-view { background: #0f172a; color: white; padding: 14px; border-radius: var(--radius); }
         .vault-auth { display: flex; gap: 6px; justify-content: center; padding: 20px 0; }
-        .vault-input { padding: 8px; border-radius: 8px; border: none; width: 140px; text-align: center; }
-        .vault-btn { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+        .vault-input { padding: 8px; border-radius: 8px; border: none; width: 140px; text-align: center; font-size: 13px; outline: none; }
+        .vault-btn { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
         .vault-content { display: none; }
         .vault-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
         .vault-card-item { background: #1e293b; padding: 12px; border-radius: 8px; border-right: 4px solid #38bdf8; }
-        .eye-btn { width: 100%; background: #334155; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; }
-        .no-results, .loading { text-align: center; padding: 20px; background: white; border-radius: var(--radius); font-weight: bold; }
+        .vault-card-item span { display: block; font-size: 10px; color: #94a3b8; margin-bottom: 3px; }
+        .vault-card-item strong { font-size: 16px; color: #38bdf8; }
+        
+        .eye-btn { width: 100%; background: #334155; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
+        .no-results { text-align: center; padding: 20px; color: var(--text-sub); background: white; border-radius: var(--radius); }
+        .loading { text-align: center; padding: 20px; font-weight: bold; color: #2563eb; background: white; border-radius: var(--radius); }
     </style>
 </head>
 <body>
 
 <div class="main-content">
     <div class="container">
-        <header><h1>نظام إدارة المشتركين والاتصالات</h1></header>
+        <header>
+            <h1>نظام إدارة المشتركين والاتصالات</h1>
+        </header>
+
         <div class="renew-days-bar">
-            <button class="renew-day-btn" onclick="autoRenewByDay(8)">🔄 تجديد يوم 8</button>
-            <button class="renew-day-btn" onclick="autoRenewByDay(18)">🔄 تجديد يوم 18</button>
-            <button class="renew-day-btn" onclick="autoRenewByDay(20)">🔄 تجديد يوم 20</button>
+            <button class="renew-day-btn" onclick="autoRenewByDay(8)">🔄 تجديد مشتركين يوم 8</button>
+            <button class="renew-day-btn" onclick="autoRenewByDay(18)">🔄 تجديد مشتركين يوم 18</button>
+            <button class="renew-day-btn" onclick="autoRenewByDay(20)">🔄 تجديد مشتركين يوم 20</button>
         </div>
+
         <div class="search-container">
             <input type="text" id="searchInput" class="search-input" placeholder="ابحث باسم العميل..." oninput="handleSearch()">
         </div>
+
         <div class="tabs">
             <button class="tab-btn active" id="tab-all" onclick="switchTab('all')">الكل <span class="count" id="count-all">0</span></button>
             <button class="tab-btn" id="tab-unpaid" onclick="switchTab('unpaid')">لم يدفع <span class="count" id="count-unpaid">0</span></button>
@@ -95,23 +141,34 @@
             <button class="tab-btn" id="tab-paid" onclick="switchTab('paid')">كامل <span class="count" id="count-paid">0</span></button>
             <button class="tab-btn vault-tab" id="tab-vault" onclick="switchTab('vault')">🔒 الخزنة</button>
         </div>
+
         <div id="list-section" class="section-content active">
             <div id="subscribersList" class="subscribers-list">
-                <div class="loading">جاري المزامنة مع جوجل شيت... 🔄</div>
+                <div class="loading">جاري مزامنة الأسماء الحية بالملي من جوجل شيت... 🔄</div>
             </div>
         </div>
+
         <div id="vault-section" class="section-content">
             <div class="vault-view">
                 <div class="vault-auth" id="vaultAuthBox">
-                    <input type="password" id="vaultPassword" class="vault-input" placeholder="أدخل الرمز">
+                    <input type="password" id="vaultPassword" class="vault-input" placeholder="أدخل الرمز السري">
                     <button class="vault-btn" onclick="unlockVault()">فتح</button>
                 </div>
                 <div class="vault-content" id="vaultContent">
                     <button class="eye-btn" onclick="toggleNumbersVisibility()">👁️ كشف / إخفاء الحسابات</button>
                     <div class="vault-grid">
-                        <div class="vault-card-item" style="border-right-color: #16a34a;"><span>💰 إجمالي الكاش الفعلي</span><strong id="v-cash">****</strong></div>
-                        <div class="vault-card-item" style="border-right-color: #dc2626;"><span>💸 ديون قديمة متأخرة</span><strong id="v-old-debts">****</strong></div>
-                        <div class="vault-card-item" style="border-right-color: #d97706;"><span>🔴 متبقي باقات الشهر الحالى</span><strong id="v-current-debt">****</strong></div>
+                        <div class="vault-card-item" style="border-right-color: #16a34a;">
+                            <span>💰 إجمالي الكاش الفعلي (اللي في جيبك حالياً)</span>
+                            <strong id="v-cash">****</strong>
+                        </div>
+                        <div class="vault-card-item" style="border-right-color: #dc2626;">
+                            <span>💸 ديون قديمة متأخرة (باقية من شهور سابقة)</span>
+                            <strong id="v-old-debts">****</strong>
+                        </div>
+                        <div class="vault-card-item" style="border-right-color: #d97706;">
+                            <span>🔴 متبقي باقات الشهر الحالي (متبقي حساب باقة الشهر ده)</span>
+                            <strong id="v-current-debt">****</strong>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -121,40 +178,58 @@
 
 <div class="modal-overlay" id="detailsModal" onclick="closeModalOutside(event)">
     <div class="modal-card">
-        <div class="modal-header"><h2 id="m-name">اسم المشترك</h2><button class="close-modal-btn" onclick="closeModal()">✕</button></div>
-        <div class="modal-grid">
-            <div class="detail-item"><span>📅 ميعاد التجديد</span><strong id="m-renew-day">0</strong></div>
-            <div class="detail-item"><span>💵 باقة الشهر</span><strong id="m-price">0 ج</strong></div>
-            <div class="detail-item"><span>🛑 ديون قديمة</span><strong id="m-debt">0 ج</strong></div>
-            <div class="detail-item"><span>✅ تم سداده</span><strong id="m-paid" style="color: #16a34a;">0 ج</strong></div>
-            <div class="detail-item" style="grid-column: span 2; background: #f1f5f9;"><span>🚨 مجموع المتبقي عليه</span><strong id="m-remaining">0 ج</strong></div>
+        <div class="modal-header">
+            <h2 id="m-name">اسم المشترك</h2>
+            <button class="close-modal-btn" onclick="closeModal()">✕</button>
         </div>
+        
+        <div class="modal-grid">
+            <div class="detail-item"><span>📅 ميعاد تجديده في الشهر</span><strong id="m-renew-day">0</strong></div>
+            <div class="detail-item"><span>💵 باقة الشهر الحالي</span><strong id="m-price">0 ج</strong></div>
+            <div class="detail-item"><span>🛑 ديون قديمة متأخرة</span><strong id="m-debt">0 ج</strong></div>
+            <div class="detail-item"><span>✅ تم سداده هذا الشهر</span><strong id="m-paid" style="color: #16a34a;">0 ج</strong></div>
+            <div class="detail-item" style="grid-column: span 2; background: #f1f5f9;"><span>🚨 مجموع المتبقي النهائي عليه</span><strong id="m-remaining">0 ج</strong></div>
+        </div>
+
         <div class="actions-row">
             <a href="#" id="m-link-call" class="action-link btn-call">📞 رن مكالمة</a>
-            <a href="#" id="m-link-wa" target="_blank" class="action-link btn-whatsapp">💬 واتساب</a>
+            <a href="#" id="m-link-wa" target="_blank" class="action-link btn-whatsapp">💬 تذكير واتساب</a>
         </div>
+
         <div class="payment-action">
-            <input type="number" class="payment-input" id="m-pay-input" placeholder="المبلغ للخصم..." oninput="calcModalCashFees()">
+            <input type="number" class="payment-input" id="m-pay-input" placeholder="ادخل المبلغ للخصم فوري..." oninput="calcModalCashFees()">
             <button class="submit-pay-btn" id="m-pay-btn">دفع الآن</button>
         </div>
-        <div class="cash-calc-box" id="m-calc-box" style="display:none;"><span>بشامل رسوم كاش (+1%):</span><strong id="m-calc-text">0 ج</strong></div>
-        <div class="history-box"><div id="m-history-content"></div></div>
+
+        <div class="cash-calc-box" id="m-calc-box" style="display:none;">
+            <span>فودافون كاش شامل الرسوم (+1%):</span>
+            <strong id="m-calc-text">0 ج</strong>
+        </div>
+
+        <div class="history-box">
+            <div class="history-title">📜 سجل العمليات هذا الشهر:</div>
+            <div id="m-history-content"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    // 🚀 الرابط الأحدث والمظبوط بالملي جوه الكود المستقر 🚀
+    // الرابط الفعلي الحقيقي والجديد الشغال 100% بدون أي تعليق
     const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwls53YP30NR3X6rprAvIeLPHoqF1cNhRZpWHBKBc1FC7I-rLShHY00nNTEu2qhYtay/exec"; 
 
     let subscribers = [];
-    let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false;
+    let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
 
     async function loadData() {
+        const listContainer = document.getElementById('subscribersList');
         try {
             const response = await fetch(SHEET_API_URL);
             const dataFromSheet = await response.json();
+            
             if (dataFromSheet && dataFromSheet.length > 0) {
-                subscribers = dataFromSheet.slice(1).map((vals, index) => {
+                // ميكانيزم قراءة العواميد المعتمد على المصفوفات لضمان عدم حدوث undefined
+                subscribers = dataFromSheet.slice(1).map((item, index) => {
+                    const vals = Object.values(item);
                     return {
                         id: parseInt(vals[0]) || (index + 1), 
                         name: vals[1] || "اسم غير مسجل",         
@@ -169,7 +244,7 @@
                 render();
             }
         } catch (error) {
-            document.getElementById('subscribersList').innerHTML = `<div class="no-results" style="color:red;">❌ خطأ اتصال حرج. تأكد من فتح صلاحية الوصول للشيت كـ "Anyone with link"!</div>`;
+            listContainer.innerHTML = `<div class="no-results" style="color:red;">❌ خطأ في سحب البيانات الحية. تأكد من إعداد النشر في السكريبت!</div>`;
         }
     }
 
@@ -177,8 +252,10 @@
         const totalRequired = sub.packagePrice + sub.previousDebt;
         const remaining = totalRequired - sub.currentPaid;
         let status = 'unpaid'; let statusText = 'لم يدفع';
+
         if (sub.currentPaid >= totalRequired) { status = 'fully-paid'; statusText = 'كامل الدفع'; }
         else if (sub.currentPaid > 0 && sub.currentPaid < totalRequired) { status = 'partial-paid'; statusText = 'دفع جزئي'; }
+
         return { totalRequired, remaining, status, statusText };
     }
 
@@ -194,33 +271,67 @@
         const listContainer = document.getElementById('subscribersList');
         if (subscribers.length === 0) return;
         listContainer.innerHTML = '';
+        
         if (currentTab === 'vault') return;
 
         let filtered = subscribers;
         if (currentTab === 'paid') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'fully-paid');
         if (currentTab === 'partial') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'partial-paid');
         if (currentTab === 'unpaid') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'unpaid');
+
         if (searchQuery.trim() !== '') filtered = filtered.filter(s => s.name.toString().includes(searchQuery.trim()));
+        if (filtered.length === 0) { listContainer.innerHTML = `<div class="no-results">لا يوجد نتائج للمطابقة.</div>`; return; }
 
         filtered.forEach(sub => {
             const { status, statusText } = getSubscriberStatus(sub);
             const card = document.createElement('div');
             card.className = `user-card ${status}`;
             card.setAttribute('onclick', `openSubscriberModal(${sub.id})`);
-            card.innerHTML = `<div class="user-info-main"><h3>${sub.name}</h3><span class="countdown-text">📅 ميعاد تجديده يوم ${sub.renewDay}</span></div><span class="status-badge">${statusText}</span>`;
+            card.innerHTML = `
+                <div class="user-info-main">
+                    <h3>${sub.name}</h3>
+                    <span class="countdown-text">📅 ميعاد تجديده يوم ${sub.renewDay} في الشهر</span>
+                </div>
+                <span class="status-badge">${statusText}</span>
+            `;
             listContainer.appendChild(card);
         });
         updateCounters();
     }
 
+    async function autoRenewByDay(dayNumber) {
+        if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
+        document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري ترحيل الديون وتحديث جوجل شيت... 🔄</div>`;
+        
+        try {
+            await fetch(SHEET_API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "renew", day: dayNumber })
+            });
+            closeModal();
+            setTimeout(loadData, 1500); 
+        } catch (e) {
+            closeModal();
+            setTimeout(loadData, 1500);
+        }
+    }
+
     function openSubscriberModal(id) {
+        activeSubId = id; 
         const sub = subscribers.find(s => s.id === id); 
         if(!sub) return;
+        
         const { remaining } = getSubscriberStatus(sub);
-        let cleanPhone = sub.phone.toString().startsWith('0') ? sub.phone.toString() : '0' + sub.phone.toString();
+        
+        let cleanPhone = sub.phone.toString();
+        if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
+            cleanPhone = '0' + cleanPhone;
+        }
 
         document.getElementById('m-name').innerText = sub.name;
-        document.getElementById('m-renew-day').innerText = `يوم ${sub.renewDay}`;
+        document.getElementById('m-renew-day').innerText = `يوم ${sub.renewDay} في الشهر`;
         document.getElementById('m-price').innerText = sub.packagePrice + " ج";
         document.getElementById('m-debt').innerText = sub.previousDebt + " ج";
         document.getElementById('m-paid').innerText = sub.currentPaid + " ج";
@@ -228,40 +339,100 @@
         document.getElementById('m-remaining').style.color = remaining > 0 ? '#dc2626' : '#16a34a';
 
         document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
-        document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('متبقي عليك ' + remaining + ' ج')}`);
-        document.getElementById('m-pay-btn').onclick = function() { submitModalPayment(id); };
-        document.getElementById('m-history-content').innerHTML = sub.history.map(h => `<div>${h}</div>`).join('') || 'لا توجد عمليات مسجلة';
+        document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('يا غالي حابين نذكرك إن تجديد باقتك يوم ' + sub.renewDay + ' والمتبقي عليك ' + remaining + ' ج')}`);
+        document.getElementById('m-pay-btn').setAttribute('onclick', `submitModalPayment(${id})`);
 
+        const histContent = document.getElementById('m-history-content');
+        histContent.innerHTML = sub.history.map(h => `<div class="timeline-item">${h}</div>`).join('') || '<div>لا توجد عمليات مسجلة</div>';
+
+        document.getElementById('m-pay-input').value = ''; 
+        document.getElementById('m-calc-box').style.display = 'none';
+        
         document.getElementById('detailsModal').style.display = 'flex'; 
         document.body.classList.add('modal-open'); 
     }
 
-    function submitModalPayment(id) {
-        const amount = parseFloat(document.getElementById('m-pay-input').value);
-        if (isNaN(amount) || amount <= 0) return;
-        document.getElementById('m-pay-btn').innerText = "جاري الحفظ...";
+    function closeModal() { 
+        document.getElementById('detailsModal').style.display = 'none'; 
+        document.body.classList.remove('modal-open'); 
+        activeSubId = null; 
+    }
+    function closeModalOutside(e) { if(e.target.id === 'detailsModal') closeModal(); }
 
-        fetch(`${SHEET_API_URL}?action=pay&id=${id}&amount=${amount}`, { method: 'POST', mode: 'no-cors' })
-        .then(() => console.log('Sent'))
-        .finally(() => {
+    function calcModalCashFees() {
+        const input = document.getElementById('m-pay-input'); const box = document.getElementById('m-calc-box');
+        const text = document.getElementById('m-calc-text'); const val = parseFloat(input.value);
+        if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
+    }
+
+    async function submitModalPayment(id) {
+        const input = document.getElementById('m-pay-input'); 
+        const amount = parseFloat(input.value);
+        if (isNaN(amount) || amount <= 0) return;
+
+        const payBtn = document.getElementById('m-pay-btn');
+        payBtn.innerText = "جاري الحفظ...";
+        
+        try {
+            await fetch(SHEET_API_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "pay", id: id, amount: amount })
+            });
+            closeModal();
+            setTimeout(loadData, 1500); 
+        } catch (e) {
             closeModal();
             setTimeout(loadData, 1500);
+        } finally {
+            payBtn.innerText = "دفع الآن";
+        }
+    }
+
+    function unlockVault() {
+        const pin = document.getElementById('vaultPassword').value;
+        if(pin === "1234") { isVaultUnlocked = true; document.getElementById('vaultAuthBox').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; calculateVaultData(); } else { alert("رمز خاطئ!"); }
+    }
+
+    function calculateVaultData() {
+        let totalCash = 0; let totalOldDebts = 0; let totalCurrentDebt = 0;
+        subscribers.forEach(sub => {
+            totalCash += sub.currentPaid;
+            totalOldDebts += sub.previousDebt;
+            const currentLeft = sub.packagePrice - sub.currentPaid;
+            if(currentLeft > 0) totalCurrentDebt += currentLeft;
         });
+
+        if(isVaultUnlocked && showNumbers) {
+            document.getElementById('v-cash').innerText = totalCash + " ج";
+            document.getElementById('v-old-debts').innerText = totalOldDebts + " ج";
+            document.getElementById('v-current-debt').innerText = totalCurrentDebt + " ج";
+        }
     }
 
-    function autoRenewByDay(dayNumber) {
-        document.getElementById('subscribersList').innerHTML = `<div class="loading">جاري التحديث... 🔄</div>`;
-        fetch(`${SHEET_API_URL}?action=renew&day=${dayNumber}`, { method: 'POST', mode: 'no-cors' })
-        .finally(() => setTimeout(loadData, 1500));
+    function toggleNumbersVisibility() {
+        showNumbers = !showNumbers;
+        if(showNumbers) { calculateVaultData(); } 
+        else { document.getElementById('v-cash').innerText = "****"; document.getElementById('v-old-debts').innerText = "****"; document.getElementById('v-current-debt').innerText = "****"; }
     }
 
-    function closeModal() { document.getElementById('detailsModal').style.display = 'none'; document.body.classList.remove('modal-open'); }
-    function closeModalOutside(e) { if(e.target.id === 'detailsModal') closeModal(); }
-    function calcModalCashFees() { const val = parseFloat(document.getElementById('m-pay-input').value); document.getElementById('m-calc-box').style.display = val > 0 ? 'flex' : 'none'; document.getElementById('m-calc-text').innerText = Math.ceil(val + Math.max(3, val * 0.01)) + " ج"; }
-    function unlockVault() { if(document.getElementById('vaultPassword').value === "1234") { isVaultUnlocked = true; document.getElementById('vaultAuthBox').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; calculateVaultData(); } }
-    function calculateVaultData() { if(!isVaultUnlocked || !showNumbers) return; let c=0, d=0, r=0; subscribers.forEach(s => { c+=s.currentPaid; d+=s.previousDebt; let left = s.packagePrice-s.currentPaid; if(left>0) r+=left; }); document.getElementById('v-cash').innerText = c+" ج"; document.getElementById('v-old-debts').innerText = d+" ج"; document.getElementById('v-current-debt').innerText = r+" ج"; }
-    function toggleNumbersVisibility() { showNumbers = !showNumbers; if(showNumbers) calculateVaultData(); else { document.getElementById('v-cash').innerText = "****"; document.getElementById('v-old-debts').innerText = "****"; document.getElementById('v-current-debt').innerText = "****"; } }
-    function switchTab(t) { currentTab = t; document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); document.getElementById(`tab-${t}`).classList.add('active'); if(t==='vault') { document.getElementById('list-section').classList.remove('active'); document.getElementById('vault-section').classList.add('active'); calculateVaultData(); } else { document.getElementById('vault-section').classList.remove('active'); document.getElementById('list-section').classList.add('active'); render(); } }
+    function switchTab(tabName) {
+        currentTab = tabName;
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${tabName}`).classList.add('active');
+
+        if(tabName === 'vault') {
+            document.getElementById('list-section').classList.remove('active');
+            document.getElementById('vault-section').classList.add('active');
+            calculateVaultData();
+        } else {
+            document.getElementById('vault-section').classList.remove('active');
+            document.getElementById('list-section').classList.add('active');
+            render();
+        }
+    }
+
     function handleSearch() { searchQuery = document.getElementById('searchInput').value; render(); }
 
     loadData();
