@@ -143,7 +143,14 @@
         .admin-add-btn { flex: 2; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 140px; }
         .backup-btn { flex: 1; background: #475569; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; }
         
-        /* زرار التذكير السريع الجديد المميز */
+        /* 📲 بار المساعد الذكي للتذكير السريع بدون قفل أمان */
+        .helper-reminder-bar { background: linear-gradient(135deg, #db2777, #9d174d); color: white; padding: 12px; border-radius: var(--radius); margin-bottom: 10px; display: none; flex-direction: column; gap: 8px; box-shadow: 0 4px 14px rgba(219,39,119,0.3); }
+        .helper-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 13px; }
+        .helper-body { display: flex; gap: 6px; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 8px; }
+        .helper-btn-go { background: #25d366; color: white; padding: 6px 14px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; display: inline-block; }
+        .helper-btn-next { background: #ffffff; color: #9d174d; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; }
+        .helper-close { background: none; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 14px; }
+        
         .fast-reminder-btn { width: 100%; background: linear-gradient(135deg, #ec4899, #be185d); color: white; border: none; padding: 11px; border-radius: var(--radius); font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px; box-shadow: 0 4px 10px rgba(190,24,93,0.2); }
     </style>
 </head>
@@ -153,12 +160,27 @@
     <div class="container">
         <header>
             <h1>نظام إدارة المشتركين</h1>
-            <button class="theme-toggle-btn" onclick="toggleTheme()">☀️ وضع النهار</button>
+            <button class="theme-toggle-btn" onclick="toggleTheme()">🌙 وضع الليل</button>
         </header>
 
         <div class="pwa-install-bar" id="pwaInstallBar">
             <span>✨ ثبت التطبيق على شاشتك الرئيسية الآن:</span>
             <button class="pwa-btn" id="pwaInstallBtn">📲 تثبيت</button>
+        </div>
+
+        <!-- 📲 شريط المساعد الذكي الجديد (مستقر ومستحيل يعمل شاشة سوداء) -->
+        <div class="helper-reminder-bar" id="helperReminderBar">
+            <div class="helper-header">
+                <span>📢 مساعد التذكير السريع المالي</span>
+                <button class="helper-close" onclick="closeHelperBar()">✕</button>
+            </div>
+            <div class="helper-body">
+                <div id="helperText" style="font-weight: 700;">جاري التحضير...</div>
+                <div style="display: flex; gap: 4px;">
+                    <a href="#" id="helperGoLink" target="_blank" class="helper-btn-go" onclick="moveToNextDebtorAutomatically()">💬 إرسال</a>
+                    <button class="helper-btn-next" onclick="skipToNextDebtor()">تخطي ➡️</button>
+                </div>
+            </div>
         </div>
 
         <div class="notification-bar" id="notificationBar">
@@ -172,8 +194,7 @@
             <button class="backup-btn" style="background:#0f172a;" onclick="triggerUploadBackup()">📤 استعادة</button>
             <input type="file" id="backupFile" style="display:none;" onchange="uploadBackup(event)">
             
-            <!-- 🚀 زرار التذكير المتتالي السريع الذكي -->
-            <button class="fast-reminder-btn" onclick="startFastReminderLoop()">🚀 بدء التذكير التلقائي المتتالي (بدون مجهود وببلاش)</button>
+            <button class="fast-reminder-btn" onclick="initHelperReminder()">🚀 بدء التذكير المتتالي السريع (آمن وضد الشاشة السوداء)</button>
         </div>
 
         <div class="renew-days-bar">
@@ -323,6 +344,7 @@
 <script>
     const ADMIN_PIN = "5566"; 
 
+    // لستة المشتركين الـ 47 الأساسية الموثقة
     const defaultSubscribers = [
         { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"], disableWA: false },
         { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"], disableWA: false },
@@ -376,6 +398,10 @@
     let subscribers = [];
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
     let deferredPrompt = null; 
+
+    // متغيرات المساعد الذكي
+    let helperDebtors = [];
+    let helperIndex = 0;
 
     function initData() {
         if ('serviceWorker' in navigator) {
@@ -498,65 +524,66 @@
         return { totalRequired, remaining, status, statusText };
     }
 
-    // 🚀 المنطق البرمجي الذكي الجديد للتذكير المتتالي ببلاش وبدون مجهود للـ 100 واحد
-    function startFastReminderLoop() {
-        // فلترة كل المشتركين اللي عليهم متبقي فلوس ومش ملغيين الواتس
-        const activeDebtors = subscribers.filter(sub => {
+    /* 🛠️ نظام المساعد المطور لمنع حظر المتصفح تماماً والشاشة السوداء */
+    function initHelperReminder() {
+        helperDebtors = subscribers.filter(sub => {
             const { remaining } = getSubscriberStatus(sub);
             return remaining > 0 && !sub.disableWA;
         });
 
-        if (activeDebtors.length === 0) {
+        if (helperDebtors.length === 0) {
             alert("🎉 ممتاز! مفيش أي مشترك عليه متبقي فلوس حالياً.");
             return;
         }
 
-        if (!confirm(`📢 سيتم بدء تذكير متتالي لـ [ ${activeDebtors.length} ] مشترك عليهم ديون ومتبقي.\n\nالطريقة: اللوحة هتفتح لك شات كل عميل على الواتس والرسالة مكتوبة جاهزة.. تدوس "إرسال" وترجع علطول عشان يفتح اللي بعده تلقائي.\n\nجاهز تبدأ؟`)) return;
+        helperIndex = 0;
+        document.getElementById('helperReminderBar').style.display = 'flex';
+        updateHelperUI();
+    }
 
-        let index = 0;
+    function updateHelperUI() {
+        if (helperIndex >= helperDebtors.length) {
+            document.getElementById('helperReminderBar').style.display = 'none';
+            alert("✅ تم الانتهاء من تذكير جميع المشتركين بنجاح وبأمان كامل!");
+            return;
+        }
 
-        function openNext() {
-            if (index >= activeDebtors.length) {
-                alert("✅ عاش يا بطل! تم الانتهاء من تذكير جميع المشتركين بنجاح وبدون أي تكلفة.");
-                return;
-            }
+        const sub = helperDebtors[helperIndex];
+        const { remaining } = getSubscriberStatus(sub);
+        
+        document.getElementById('helperText').innerHTML = `🔄 عميل [${helperIndex + 1}/${helperDebtors.length}]: <b style="color:#fdf2f8;">${sub.name}</b> (باقي ${remaining} ج)`;
 
-            const sub = activeDebtors[index];
-            const { remaining } = getSubscriberStatus(sub);
-            const timestamp = getFormattedDateTime();
-
-            const waMessage = `يا غالي حابين نذكرك بتفاصيل اشتراكك والمتبقي عليك حالياً:
+        const waMessage = `يا غالي حابين نذكرك بتفاصيل اشتراكك والمتبقي عليك حالياً:
 • حساب باقتك: (${sub.packagePrice}) ج.
 • متأخرات قديمة: (${sub.previousDebt}) ج.
 • إجمالي المدفوع: (${sub.currentPaid}) ج.
 *المتبقي النهائي المطلوب سداده: (${remaining}) ج.*
 برجاء السداد لضمان استمرار الخدمة! 🌸`;
 
-            let cleanPhone = sub.phone.toString();
-            if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
-                cleanPhone = '0' + cleanPhone;
-            }
-
-            const waUrl = `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
-            
-            index++;
-            
-            // فتح الرابط في نافذة جديدة
-            window.open(waUrl, '_blank');
-
-            // إعطاء تنبيه خفيف للمستخدم للانتقال للاسم التالي بعد ما يرجع
-            setTimeout(() => {
-                if (index < activeDebtors.length) {
-                    if (confirm(`اضغط "موافق" لفتح الاسم التالي تلقائياً ⬇️\n\n[ ${index + 1} / ${activeDebtors.length} ] : ${activeDebtors[index].name}`)) {
-                        openNext();
-                    }
-                } else {
-                    openNext();
-                }
-            }, 800);
+        let cleanPhone = sub.phone.toString();
+        if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
+            cleanPhone = '0' + cleanPhone;
         }
 
-        openNext();
+        const waUrl = `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
+        document.getElementById('helperGoLink').setAttribute('href', waUrl);
+    }
+
+    function moveToNextDebtorAutomatically() {
+        // بمجرد ضغط المستخدم على زر "إرسال"، نجهز العميل التالي تلقائياً في الخلفية
+        setTimeout(() => {
+            helperIndex++;
+            updateHelperUI();
+        }, 1000);
+    }
+
+    function skipToNextDebtor() {
+        helperIndex++;
+        updateHelperUI();
+    }
+
+    function closeHelperBar() {
+        document.getElementById('helperReminderBar').style.display = 'none';
     }
 
     function updateCounters() {
@@ -814,7 +841,7 @@
 
     function deleteActiveSubscriber() {
         if (!checkAdminAuth()) return; 
-        const sub = subscribers.find(s => s.id === activeSubId);
+        const sub = subscribers.find(s => s.id !== activeSubId);
         if(!sub) return;
 
         if (confirm(`🚨 هل أنت متأكد من مسح العميل [ ${sub.name} ] نهائياً من السيستم؟ لا يمكن استرجاعه!`)) {
