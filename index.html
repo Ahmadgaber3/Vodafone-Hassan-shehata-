@@ -142,9 +142,10 @@
         .eye-btn { width: 100%; background: #334155; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
         .no-results { text-align: center; padding: 20px; color: var(--text-sub); background: var(--card-bg); border-radius: var(--radius); }
         
-        .admin-bar { display: flex; gap: 4px; margin-bottom: 8px; }
-        .admin-add-btn { flex: 2; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .admin-bar { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
+        .admin-add-btn { flex: 2; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 140px; }
         .backup-btn { flex: 1; background: #475569; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; }
+        .broadcast-copy-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; border: none; padding: 11px; border-radius: var(--radius); font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px; box-shadow: 0 4px 10px rgba(109,40,217,0.2); }
     </style>
 </head>
 <body>
@@ -168,9 +169,12 @@
 
         <div class="admin-bar">
             <button class="admin-add-btn" onclick="openAddSubscriberModal()">➕ إضافة مشترك جديد</button>
-            <button class="backup-btn" onclick="downloadBackup()">📥 نسخ احتياطي</button>
+            <button class="backup-btn" onclick="downloadBackup()">📥 نسخ</button>
             <button class="backup-btn" style="background:#0f172a;" onclick="triggerUploadBackup()">📤 استعادة</button>
             <input type="file" id="backupFile" style="display:none;" onchange="uploadBackup(event)">
+            
+            <!-- 📢 الزرار الجديد المضاف للتذكير الجماعي فوري بدون مجهود وببلاش -->
+            <button class="broadcast-copy-btn" onclick="copyBroadcastReport()">📋 نسخ تقرير ديون أول الشهر (للواتساب الجماعي)</button>
         </div>
 
         <div class="renew-days-bar">
@@ -195,7 +199,7 @@
             <div id="subscribersList" class="subscribers-list"></div>
         </div>
 
-        <!-- 🔒 قسم الخزنة المطور بالثلاث خانات المطلوبة بالملي -->
+        <!-- 🔒 قسم الخزنة المطور -->
         <div id="vault-section" class="section-content">
             <div class="vault-view">
                 <div class="vault-auth" id="vaultAuthBox">
@@ -321,7 +325,6 @@
 <script>
     const ADMIN_PIN = "5566"; 
 
-    // لستة المشتركين الـ 47 الأساسية الموثقة[span_1](start_span)[span_1](end_span)
     const defaultSubscribers = [
         { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"], disableWA: false },
         { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"], disableWA: false },
@@ -391,7 +394,7 @@
         if (stored) {
             subscribers = JSON.parse(stored);
         } else {
-            subscribers = defaultSubscribers;[span_2](start_span)[span_2](end_span)
+            subscribers = defaultSubscribers;
             saveData();
         }
         render();
@@ -495,6 +498,38 @@
         else if (sub.currentPaid > 0 && sub.currentPaid < totalRequired) { status = 'partial-paid'; statusText = 'دفع جزئي'; }
 
         return { totalRequired, remaining, status, statusText };
+    }
+
+    // 📋 وظيفة إنشاء ونسخ تقرير الديون التلقائي بضغطة زر
+    function copyBroadcastReport() {
+        let reportText = `📊 *تقرير اشتراكات وتذكير متبقي الديون:*\n`;
+        reportText += `تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}\n`;
+        reportText += `-------------------------------------------\n\n`;
+        
+        let debtorsCount = 0;
+
+        subscribers.forEach(sub => {
+            const { remaining } = getSubscriberStatus(sub);
+            if (remaining > 0) {
+                reportText += `• *${sub.name}* -> متبقي عليه: (${remaining} ج) [تجديد يوم ${sub.renewDay}]\n`;
+                debtorsCount++;
+            }
+        });
+
+        reportText += `\n-------------------------------------------\n`;
+        reportText += `💡 *برجاء من السادة الأفاضل سرعة سداد المبالغ المتبقية لضمان استمرار الخدمة دون انقطاع. شكراً لكم! 🌸*`;
+
+        if (debtorsCount === 0) {
+            alert("🎉 ممتاز! مفيش أي مشترك عليه متبقي فلوس حالياً.");
+            return;
+        }
+
+        // تنفيذ عملية النسخ للحافظة (Clipboard)
+        navigator.clipboard.writeText(reportText).then(() => {
+            alert(`✅ تم نسخ تقرير أول الشهر بنجاح لـ [${debtorsCount}] مشترك عليهم متبقي فلوس!\n\nكل اللي عليك تفتح تطبيق الواتس وتعمل "لصق" (Paste) في قائمة الرسائل الجماعية (Broadcast) وهتوصل للكل فوراً.`);
+        }).catch(err => {
+            alert("⚠️ فشل النسخ التلقائي، تأكد من إعطاء الصلاحية للمتصفح.");
+        });
     }
 
     function updateCounters() {
@@ -815,21 +850,15 @@
         if(pin === "1234") { isVaultUnlocked = true; document.getElementById('vaultAuthBox').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; calculateVaultData(); } else { alert("رمز خاطئ!"); }
     }
 
-    // 🔄 تحديث طريقة حساب الداتا الرياضية للخزنة الجديدة بالملي
     function calculateVaultData() {
         let totalRequired = 0; 
         let totalRemaining = 0; 
         let totalPaid = 0;
 
         subscribers.forEach(sub => {
-            // حساب الإجمالي لكل مشترك (باقته الحالية + ديونه القديمة)
             const subTotal = sub.packagePrice + sub.previousDebt;
             totalRequired += subTotal;
-
-            // حساب المدفوع الفعلي لكل مشترك
             totalPaid += sub.currentPaid;
-
-            // حساب المتبقي الفعلي لكل مشترك
             const { remaining } = getSubscriberStatus(sub);
             totalRemaining += remaining;
         });
