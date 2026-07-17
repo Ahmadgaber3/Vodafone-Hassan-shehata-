@@ -143,7 +143,7 @@
         .admin-add-btn { flex: 2; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 140px; }
         .backup-btn { flex: 1; background: #475569; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; }
         
-        /* 📲 بار المساعد الذكي للتذكير السريع بدون قفل أمان */
+        /* 📲 ستايل المساعد العلوي الآمن */
         .helper-reminder-bar { background: linear-gradient(135deg, #db2777, #9d174d); color: white; padding: 12px; border-radius: var(--radius); margin-bottom: 10px; display: none; flex-direction: column; gap: 8px; box-shadow: 0 4px 14px rgba(219,39,119,0.3); }
         .helper-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 13px; }
         .helper-body { display: flex; gap: 6px; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 8px; }
@@ -168,10 +168,10 @@
             <button class="pwa-btn" id="pwaInstallBtn">📲 تثبيت</button>
         </div>
 
-        <!-- 📲 شريط المساعد الذكي الجديد (مستقر ومستحيل يعمل شاشة سوداء) -->
+        <!-- 📲 شريط المساعد الذكي الآمن -->
         <div class="helper-reminder-bar" id="helperReminderBar">
             <div class="helper-header">
-                <span>📢 مساعد التذكير السريع المالي</span>
+                <span>📢 مساعد التذكير المالي السريع</span>
                 <button class="helper-close" onclick="closeHelperBar()">✕</button>
             </div>
             <div class="helper-body">
@@ -194,7 +194,7 @@
             <button class="backup-btn" style="background:#0f172a;" onclick="triggerUploadBackup()">📤 استعادة</button>
             <input type="file" id="backupFile" style="display:none;" onchange="uploadBackup(event)">
             
-            <button class="fast-reminder-btn" onclick="initHelperReminder()">🚀 بدء التذكير المتتالي السريع (آمن وضد الشاشة السوداء)</button>
+            <button class="fast-reminder-btn" onclick="initHelperReminder()">🚀 بدء التذكير المتتالي السريع</button>
         </div>
 
         <div class="renew-days-bar">
@@ -344,7 +344,6 @@
 <script>
     const ADMIN_PIN = "5566"; 
 
-    // لستة المشتركين الـ 47 الأساسية الموثقة
     const defaultSubscribers = [
         { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"], disableWA: false },
         { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"], disableWA: false },
@@ -399,7 +398,6 @@
     let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
     let deferredPrompt = null; 
 
-    // متغيرات المساعد الذكي
     let helperDebtors = [];
     let helperIndex = 0;
 
@@ -411,7 +409,6 @@
         const storedTheme = localStorage.getItem('theme_pref_v6');
         if (storedTheme === 'dark') {
             document.body.classList.add('dark-mode');
-            document.querySelector('.theme-toggle-btn').innerText = "☀️ وضع النهار";
         }
 
         const stored = localStorage.getItem('local_subscribers_v7');
@@ -441,11 +438,6 @@
         deferredPrompt = null;
     });
 
-    window.addEventListener('appinstalled', () => {
-        document.getElementById('pwaInstallBar').style.display = 'none';
-        deferredPrompt = null;
-    });
-
     function saveData() {
         localStorage.setItem('local_subscribers_v7', JSON.stringify(subscribers));
     }
@@ -453,14 +445,12 @@
     function toggleTheme() {
         const isDark = document.body.classList.toggle('dark-mode');
         localStorage.setItem('theme_pref_v6', isDark ? 'dark' : 'light');
-        document.querySelector('.theme-toggle-btn').innerText = isDark ? "☀️ وضع النهار" : "🌙 وضع الليل";
     }
 
     function checkTodayRenewals() {
         const todayDay = new Date().getDate(); 
         const count = subscribers.filter(s => s.renewDay === todayDay).length;
         const bar = document.getElementById('notificationBar');
-        
         if (count > 0) {
             document.getElementById('notificationText').innerText = `⚠️ تنبيه: لديك اليوم [${count}] مشتركين ميعاد تجديد باقتهم النهاردة!`;
             bar.style.display = 'flex';
@@ -477,65 +467,41 @@
         const listContainer = document.getElementById('subscribersList');
         listContainer.innerHTML = '';
         
-        const filtered = subscribers.filter(s => s.renewDay === todayDay).sort((a, b) => {
-            return getSubscriberStatus(b).remaining - getSubscriberStatus(a).remaining;
-        });
-
+        const filtered = subscribers.filter(s => s.renewDay === todayDay);
         filtered.forEach(sub => {
             const { remaining, status, statusText } = getSubscriberStatus(sub);
             const card = document.createElement('div');
             card.className = `user-card ${status}`;
             card.setAttribute('onclick', `openSubscriberModal(${sub.id})`);
-            
             const debtTag = remaining > 0 ? `<span class="debt-outside-tag">باقي عليه: ${remaining} ج</span>` : `<span class="no-debt-outside-tag">خالص ✅</span>`;
-
-            card.innerHTML = `
-                <div class="user-info-main">
-                    <h3><span>${sub.name}</span> ${debtTag}</h3>
-                    <span class="countdown-text">📅 تجديده اليوم (يوم ${sub.renewDay})</span>
-                </div>
-                <span class="status-badge">${statusText}</span>
-            `;
+            card.innerHTML = `<div class="user-info-main"><h3><span>${sub.name}</span> ${debtTag}</h3><span class="countdown-text">📅 تجديده اليوم</span></div><span class="status-badge">${statusText}</span>`;
             listContainer.appendChild(card);
         });
     }
 
     function getFormattedDateTime() {
         const now = new Date();
-        const y = now.getFullYear();
-        const m = now.getMonth() + 1;
-        const d = now.getDate();
-        let hours = now.getHours();
-        const mins = now.getMinutes().toString().padStart(2, '0');
-        const ampm = hours >= 12 ? 'م' : 'ص';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        return `[${d}/${m}/${y} - ${hours}:${mins} ${ampm}]`;
+        return `[${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}]`;
     }
 
     function getSubscriberStatus(sub) {
         const totalRequired = sub.packagePrice + sub.previousDebt;
         const remaining = totalRequired - sub.currentPaid;
         let status = 'unpaid'; let statusText = 'لم يدفع';
-
         if (sub.currentPaid >= totalRequired) { status = 'fully-paid'; statusText = 'كامل الدفع'; }
         else if (sub.currentPaid > 0 && sub.currentPaid < totalRequired) { status = 'partial-paid'; statusText = 'دفع جزئي'; }
-
         return { totalRequired, remaining, status, statusText };
     }
 
-    /* 🛠️ نظام المساعد المطور لمنع حظر المتصفح تماماً والشاشة السوداء */
     function initHelperReminder() {
         helperDebtors = subscribers.filter(sub => {
             const { remaining } = getSubscriberStatus(sub);
             return remaining > 0 && !sub.disableWA;
         });
-
         if (helperDebtors.length === 0) {
             alert("🎉 ممتاز! مفيش أي مشترك عليه متبقي فلوس حالياً.");
             return;
         }
-
         helperIndex = 0;
         document.getElementById('helperReminderBar').style.display = 'flex';
         updateHelperUI();
@@ -547,34 +513,20 @@
             alert("✅ تم الانتهاء من تذكير جميع المشتركين بنجاح وبأمان كامل!");
             return;
         }
-
         const sub = helperDebtors[helperIndex];
         const { remaining } = getSubscriberStatus(sub);
-        
-        document.getElementById('helperText').innerHTML = `🔄 عميل [${helperIndex + 1}/${helperDebtors.length}]: <b style="color:#fdf2f8;">${sub.name}</b> (باقي ${remaining} ج)`;
-
-        const waMessage = `يا غالي حابين نذكرك بتفاصيل اشتراكك والمتبقي عليك حالياً:
-• حساب باقتك: (${sub.packagePrice}) ج.
-• متأخرات قديمة: (${sub.previousDebt}) ج.
-• إجمالي المدفوع: (${sub.currentPaid}) ج.
-*المتبقي النهائي المطلوب سداده: (${remaining}) ج.*
-برجاء السداد لضمان استمرار الخدمة! 🌸`;
-
+        document.getElementById('helperText').innerHTML = `🔄 عميل [${helperIndex + 1}/${helperDebtors.length}]: <b>${sub.name}</b> (${remaining} ج)`;
+        const waMessage = `يا غالي حابين نذكرك بتفاصيل اشتراكك والمتبقي عليك حالياً:\n• حساب باقتك: (${sub.packagePrice}) ج.\n• متأخرات قديمة: (${sub.previousDebt}) ج.\n• إجمالي المدفوع: (${sub.currentPaid}) ج.\n*المتبقي النهائي المطلوب سداده: (${remaining}) ج.*\nبرجاء السداد لضمان استمرار الخدمة! 🌸`;
         let cleanPhone = sub.phone.toString();
-        if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
-            cleanPhone = '0' + cleanPhone;
-        }
-
-        const waUrl = `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
-        document.getElementById('helperGoLink').setAttribute('href', waUrl);
+        if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) cleanPhone = '0' + cleanPhone;
+        document.getElementById('helperGoLink').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`);
     }
 
     function moveToNextDebtorAutomatically() {
-        // بمجرد ضغط المستخدم على زر "إرسال"، نجهز العميل التالي تلقائياً في الخلفية
         setTimeout(() => {
             helperIndex++;
             updateHelperUI();
-        }, 1000);
+        }, 800);
     }
 
     function skipToNextDebtor() {
@@ -597,36 +549,21 @@
     function render() {
         const listContainer = document.getElementById('subscribersList');
         listContainer.innerHTML = '';
-        
         if (currentTab === 'vault') return;
-
         let filtered = subscribers;
         if (currentTab === 'paid') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'fully-paid');
         if (currentTab === 'partial') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'partial-paid');
         if (currentTab === 'unpaid') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'unpaid');
-
         if (searchQuery.trim() !== '') filtered = filtered.filter(s => s.name.toString().includes(searchQuery.trim()));
         if (filtered.length === 0) { listContainer.innerHTML = `<div class="no-results">لا يوجد نتائج للمطابقة.</div>`; return; }
-
-        filtered.sort((a, b) => {
-            return getSubscriberStatus(b).remaining - getSubscriberStatus(a).remaining;
-        });
-
+        filtered.sort((a, b) => getSubscriberStatus(b).remaining - getSubscriberStatus(a).remaining);
         filtered.forEach(sub => {
             const { remaining, status, statusText } = getSubscriberStatus(sub);
             const card = document.createElement('div');
             card.className = `user-card ${status}`;
             card.setAttribute('onclick', `openSubscriberModal(${sub.id})`);
-            
             const debtTag = remaining > 0 ? `<span class="debt-outside-tag">باقي عليه: ${remaining} ج</span>` : `<span class="no-debt-outside-tag">خالص ✅</span>`;
-
-            card.innerHTML = `
-                <div class="user-info-main">
-                    <h3><span>${sub.name}</span> ${debtTag}</h3>
-                    <span class="countdown-text">📅 ميعاد تجديد يوم ${sub.renewDay} في الشهر</span>
-                </div>
-                <span class="status-badge">${statusText}</span>
-            `;
+            card.innerHTML = `<div class="user-info-main"><h3><span>${sub.name}</span> ${debtTag}</h3><span class="countdown-text">📅 ميعاد تجديد يوم ${sub.renewDay} في الشهر</span></div><span class="status-badge">${statusText}</span>`;
             listContainer.appendChild(card);
         });
         updateCounters();
@@ -634,116 +571,54 @@
 
     function autoRenewByDay(dayNumber) {
         if (!checkAdminAuth()) return; 
-        if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
-        
-        const timestamp = getFormattedDateTime();
+        if (!confirm(`هل تريد تدوير الحسابات تلقائياً ليوم [ ${dayNumber} ]؟`)) return;
         subscribers.forEach(sub => {
             if (sub.renewDay === dayNumber) {
                 const { remaining } = getSubscriberStatus(sub);
-                sub.previousDebt = remaining; 
-                sub.currentPaid = 0;          
-                sub.history.push(`${timestamp} تدوير تلقائي للمتبقي: ${remaining} ج`);
+                sub.previousDebt = remaining; sub.currentPaid = 0;          
+                sub.history.push(`تدوير تلقائي للمتبقي: ${remaining} ج`);
             }
         });
-        
-        saveData();
-        render();
-        alert(`تم تدوير حسابات يوم ${dayNumber} بنجاح! 🚀`);
+        saveData(); render();
     }
 
     function openSubscriberModal(id) {
-        activeSubId = id; 
-        const sub = subscribers.find(s => s.id === id); 
-        if(!sub) return;
-        
-        const { remaining } = getSubscriberStatus(sub);
-        let cleanPhone = sub.phone.toString();
-
+        activeSubId = id; const sub = subscribers.find(s => s.id === id); if(!sub) return;
+        const { remaining } = getSubscriberStatus(sub); let cleanPhone = sub.phone.toString();
         document.getElementById('m-name').innerText = sub.name;
         document.getElementById('m-renew-day').innerText = `يوم ${sub.renewDay} في الشهر`;
         document.getElementById('m-price').innerText = sub.packagePrice + " ج";
         document.getElementById('m-debt').innerText = sub.previousDebt + " ج";
         document.getElementById('m-paid').innerText = sub.currentPaid + " ج";
         document.getElementById('m-remaining').innerText = remaining + " ج";
-        document.getElementById('m-remaining').style.color = remaining > 0 ? '#dc2626' : '#16a34a';
-
         document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
-        document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('يا غالي حابين نذكرك إن تجديد باقتك يوم ' + sub.renewDay + ' والمتبقي عليك ' + remaining + ' ج')}`);
+        document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('متبقي عليك ' + remaining + ' ج')}`);
         document.getElementById('m-pay-btn').setAttribute('onclick', `submitModalPayment(${id})`);
-
-        const histContent = document.getElementById('m-history-content');
-        histContent.innerHTML = sub.history.map(h => `<div class="timeline-item">${h}</div>`).join('') || '<div>لا توجد عمليات مسجلة</div>';
-
-        document.getElementById('m-pay-input').value = ''; 
-        document.getElementById('m-calc-box').style.display = 'none';
-        
-        document.getElementById('detailsModal').style.display = 'flex'; 
-        document.body.classList.add('modal-open'); 
+        document.getElementById('m-history-content').innerHTML = sub.history.map(h => `<div class="timeline-item">${h}</div>`).join('') || '<div>لا توجد عمليات</div>';
+        document.getElementById('detailsModal').style.display = 'flex'; document.body.classList.add('modal-open'); 
     }
 
-    function closeModal() { 
-        document.getElementById('detailsModal').style.display = 'none'; 
-        document.body.classList.remove('modal-open'); 
-    }
+    function closeModal() { document.getElementById('detailsModal').style.display = 'none'; document.body.classList.remove('modal-open'); }
     function closeModalOutside(e) { if(e.target.id === 'detailsModal') closeModal(); }
-
     function calcModalCashFees() {
         const input = document.getElementById('m-pay-input'); const box = document.getElementById('m-calc-box');
         const text = document.getElementById('m-calc-text'); const val = parseFloat(input.value);
-        if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
+        if(!isNaN(val) && val > 0) { box.style.display = 'flex'; text.innerText = `${Math.ceil(val + Math.max(3, val * 0.01))} ج`; } else { box.style.display = 'none'; }
     }
 
     function submitModalPayment(id) {
-        const input = document.getElementById('m-pay-input'); 
-        const amount = parseFloat(input.value);
+        const input = document.getElementById('m-pay-input'); const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
-
         const sub = subscribers.find(s => s.id === id);
         if (sub) {
-            const timestamp = getFormattedDateTime();
-            sub.currentPaid += amount;
-            sub.history.push(`${timestamp} دفع: ${amount} ج`);
-            saveData();
-
-            const { remaining } = getSubscriberStatus(sub);
-            
-            if (sub.disableWA) {
-                closeModal();
-                render();
-                return;
-            }
-
-            const waMessage = `يا غالي، تم استلام مبلغ (${amount}) ج بنجاح بتاريخ ${timestamp.split(' - ')[0].replace('[','')}.
-• حساب باقتك الحالي: (${sub.packagePrice}) ج.
-• ديون قديمة متأخرة: (${sub.previousDebt}) ج.
-• إجمالي المدفوع هذا الشهر: (${sub.currentPaid}) ج.
-*المتبقي النهائي عليك حالياً: (${remaining}) ج.*
-شكراً لتعاملك معنا! 🌸`;
-
-            let cleanPhone = sub.phone.toString();
-            if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
-                cleanPhone = '0' + cleanPhone;
-            }
-
-            const waUrl = `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
-            
-            closeModal();
-            render();
-
-            window.open(waUrl, '_blank');
+            sub.currentPaid += amount; sub.history.push(`دفع: ${amount} ج`); saveData(); closeModal(); render();
         }
     }
 
     function openAddSubscriberModal() {
         if (!checkAdminAuth()) return; 
-        document.getElementById('add-name').value = '';
-        document.getElementById('add-phone').value = '';
-        document.getElementById('add-renew').value = '';
-        document.getElementById('add-price').value = '';
-        document.getElementById('add-debt').value = '';
         document.getElementById('addModal').style.display = 'flex';
     }
-
     function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
     function closeAddModalOutside(e) { if(e.target.id === 'addModal') closeAddModal(); }
 
@@ -753,38 +628,14 @@
         const renew = parseInt(document.getElementById('add-renew').value);
         const price = parseFloat(document.getElementById('add-price').value);
         const debt = parseFloat(document.getElementById('add-debt').value) || 0;
-
-        if (!name || isNaN(renew) || isNaN(price)) {
-            alert("برجاء ملء البيانات الأساسية (الاسم، يوم التجديد، والباقة)!");
-            return;
-        }
-
+        if (!name || isNaN(renew) || isNaN(price)) return;
         const newId = subscribers.length > 0 ? Math.max(...subscribers.map(s => s.id)) + 1 : 1;
-        const timestamp = getFormattedDateTime();
-
-        subscribers.push({
-            id: newId,
-            name: name,
-            phone: phone,
-            renewDay: renew,
-            packagePrice: price,
-            previousDebt: debt,
-            currentPaid: 0,
-            history: [`${timestamp} تمت الإضافة للسيستم`],
-            disableWA: false
-        });
-
-        saveData();
-        closeAddModal();
-        render();
-        alert(`تمت إضافة العميل [ ${name} ] للسيستم بنجاح! 🎉`);
+        subscribers.push({ id: newId, name: name, phone: phone, renewDay: renew, packagePrice: price, previousDebt: debt, currentPaid: 0, history: ['تمت الإضافة'], disableWA: false });
+        saveData(); closeAddModal(); render();
     }
 
     function openEditModalFromDetails() {
-        if (!checkAdminAuth()) return; 
-        const sub = subscribers.find(s => s.id === activeSubId);
-        if(!sub) return;
-
+        const sub = subscribers.find(s => s.id === activeSubId); if(!sub) return;
         document.getElementById('edit-name').value = sub.name;
         document.getElementById('edit-phone').value = sub.phone;
         document.getElementById('edit-renew').value = sub.renewDay;
@@ -792,131 +643,63 @@
         document.getElementById('edit-debt').value = sub.previousDebt;
         document.getElementById('edit-paid').value = sub.currentPaid;
         document.getElementById('edit-disable-wa').checked = sub.disableWA || false;
-
-        document.getElementById('detailsModal').style.display = 'none'; 
-        document.getElementById('editModal').style.display = 'flex';    
+        document.getElementById('detailsModal').style.display = 'none'; document.getElementById('editModal').style.display = 'flex';    
     }
 
-    function closeEditModal() { 
-        document.getElementById('editModal').style.display = 'none'; 
-        document.body.classList.remove('modal-open'); 
-    }
+    function closeEditModal() { document.getElementById('editModal').style.display = 'none'; document.body.classList.remove('modal-open'); }
     function closeEditModalOutside(e) { if(e.target.id === 'editModal') closeEditModal(); }
 
     function submitEditSubscriber() {
-        const sub = subscribers.find(s => s.id === activeSubId);
-        if(!sub) {
-            alert("خطأ في تحديد المشترك!");
-            return;
-        }
-
-        const name = document.getElementById('edit-name').value.trim();
-        const phone = document.getElementById('edit-phone').value.trim();
-        const renew = parseInt(document.getElementById('edit-renew').value);
-        const price = parseFloat(document.getElementById('edit-price').value);
-        const debt = parseFloat(document.getElementById('edit-debt').value) || 0;
-        const paid = parseFloat(document.getElementById('edit-paid').value) || 0;
-        const disableWA = document.getElementById('edit-disable-wa').checked;
-
-        if (!name || isNaN(renew) || isNaN(price)) {
-            alert("الاسم، يوم التجديد، والباقة بيانات إلزامية!");
-            return;
-        }
-
-        const timestamp = getFormattedDateTime();
-        sub.name = name;
-        sub.phone = phone;
-        sub.renewDay = renew;
-        sub.packagePrice = price;
-        sub.previousDebt = debt;
-        sub.currentPaid = paid;
-        sub.disableWA = disableWA;
-        sub.history.push(`${timestamp} تعديل البيانات والخيارات يدوياً`);
-
-        saveData();
-        closeEditModal();
-        render();
-        alert("تم حفظ التعديلات بنجاح! ✏️");
+        const sub = subscribers.find(s => s.id === activeSubId); if(!sub) return;
+        sub.name = document.getElementById('edit-name').value.trim();
+        sub.phone = document.getElementById('edit-phone').value.trim();
+        sub.renewDay = parseInt(document.getElementById('edit-renew').value);
+        sub.packagePrice = parseFloat(document.getElementById('edit-price').value);
+        sub.previousDebt = parseFloat(document.getElementById('edit-debt').value) || 0;
+        sub.currentPaid = parseFloat(document.getElementById('edit-paid').value) || 0;
+        sub.disableWA = document.getElementById('edit-disable-wa').checked;
+        saveData(); closeEditModal(); render();
     }
 
     function deleteActiveSubscriber() {
         if (!checkAdminAuth()) return; 
-        const sub = subscribers.find(s => s.id !== activeSubId);
-        if(!sub) return;
-
-        if (confirm(`🚨 هل أنت متأكد من مسح العميل [ ${sub.name} ] نهائياً من السيستم؟ لا يمكن استرجاعه!`)) {
-            subscribers = subscribers.filter(s => s.id !== activeSubId);
-            saveData();
-            closeModal();
-            render();
-            alert("تم حذف العميل من السيستم بنجاح.");
-        }
+        subscribers = subscribers.filter(s => s.id !== activeSubId); saveData(); closeModal(); render();
     }
 
     function downloadBackup() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(subscribers));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `نسخة_احتياطية_المشتركين_${new Date().toISOString().slice(0,10)}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
+        const anchor = document.createElement('a'); anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", "نسخة_احتياطية.json"); anchor.click();
     }
 
-    function triggerUploadBackup() {
-        if (!checkAdminAuth()) return; 
-        document.getElementById('backupFile').click();
-    }
-
+    function triggerUploadBackup() { if (!checkAdminAuth()) return; document.getElementById('backupFile').click(); }
     function uploadBackup(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
+        const file = event.target.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
                 const parsed = JSON.parse(e.target.result);
-                if (Array.isArray(parsed)) {
-                    subscribers = parsed;
-                    saveData();
-                    render();
-                    alert("📊 تم استعادة وتحميل النسخة الاحتياطية بنجاح 100%!");
-                } else {
-                    alert("الملف غير صالح أو تالف!");
-                }
-            } catch (err) {
-                alert("خطأ في قراءة ملف النسخة الاحتياطية!");
-            }
+                if (Array.isArray(parsed)) { subscribers = parsed; saveData(); render(); alert("تمت الاستعادة!"); }
+            } catch (err) { alert("خطأ في الملف!"); }
         };
         reader.readAsText(file);
-        event.target.value = ''; 
     }
 
     function checkAdminAuth() {
-        const pin = prompt("🔐 برجاء إدخال رمز الإدارة السري للمتابعة:");
-        if (pin === ADMIN_PIN) return true;
-        alert("❌ رمز حماية خاطئ!");
-        return false;
+        const pin = prompt("🔐 أدخل الرمز السري للإدارة:");
+        return pin === ADMIN_PIN;
     }
 
     function unlockVault() {
-        const pin = document.getElementById('vaultPassword').value;
-        if(pin === "1234") { isVaultUnlocked = true; document.getElementById('vaultAuthBox').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; calculateVaultData(); } else { alert("رمز خاطئ!"); }
+        if(document.getElementById('vaultPassword').value === "1234") { isVaultUnlocked = true; document.getElementById('vaultAuthBox').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; calculateVaultData(); }
     }
 
     function calculateVaultData() {
-        let totalRequired = 0; 
-        let totalRemaining = 0; 
-        let totalPaid = 0;
-
+        let totalRequired = 0; let totalRemaining = 0; let totalPaid = 0;
         subscribers.forEach(sub => {
-            const subTotal = sub.packagePrice + sub.previousDebt;
-            totalRequired += subTotal;
-            totalPaid += sub.currentPaid;
-            const { remaining } = getSubscriberStatus(sub);
-            totalRemaining += remaining;
+            totalRequired += (sub.packagePrice + sub.previousDebt); totalPaid += sub.currentPaid;
+            totalRemaining += getSubscriberStatus(sub).remaining;
         });
-
         if(isVaultUnlocked && showNumbers) {
             document.getElementById('v-total-required').innerText = totalRequired + " ج";
             document.getElementById('v-total-remaining').innerText = totalRemaining + " ج";
@@ -925,29 +708,15 @@
     }
 
     function toggleNumbersVisibility() {
-        showNumbers = !showNumbers;
-        if(showNumbers) { calculateVaultData(); } 
-        else { 
-            document.getElementById('v-total-required').innerText = "****"; 
-            document.getElementById('v-total-remaining').innerText = "****"; 
-            document.getElementById('v-total-paid').innerText = "****"; 
-        }
+        showNumbers = !showNumbers; if(showNumbers) calculateVaultData();
+        else { document.getElementById('v-total-required').innerText = "****"; document.getElementById('v-total-remaining').innerText = "****"; document.getElementById('v-total-paid').innerText = "****"; }
     }
 
     function switchTab(tabName) {
-        currentTab = tabName;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        currentTab = tabName; document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`tab-${tabName}`).classList.add('active');
-
-        if(tabName === 'vault') {
-            document.getElementById('list-section').classList.remove('active');
-            document.getElementById('vault-section').classList.add('active');
-            calculateVaultData();
-        } else {
-            document.getElementById('vault-section').classList.remove('active');
-            document.getElementById('list-section').classList.add('active');
-            render();
-        }
+        if(tabName === 'vault') { document.getElementById('list-section').classList.remove('active'); document.getElementById('vault-section').classList.add('active'); calculateVaultData(); }
+        else { document.getElementById('vault-section').classList.remove('active'); document.getElementById('list-section').classList.add('active'); render(); }
     }
 
     function handleSearch() { searchQuery = document.getElementById('searchInput').value; render(); }
