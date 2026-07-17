@@ -1,865 +1,1021 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة المشتركين الاحترافية</title>
-    <!-- ربط ملف المانيفست الذكي للـ PWA -->
+    <title>كباب صلاح | المنيو الرسمي</title>
+    
+    <meta name="theme-color" content="#e65100">
+    
+    <!-- ملف الـ manifest لتعريف التطبيق -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563eb">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
     <style>
+        /* الألوان الرسمية المحدثة بالتباين المطلق */
         :root {
-            --primary: linear-gradient(135deg, #2563eb, #1d4ed8);
-            --success: linear-gradient(135deg, #16a34a, #15803d);
-            --warning: linear-gradient(135deg, #d97706, #b45309);
-            --danger: linear-gradient(135deg, #dc2626, #b91c1c);
-            --bg: #e2e8f0;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --border: #cbd5e1;
-            --radius: 12px;
+            --bg: #f5f2eb; /* خلفية كريمي فخمة بين الأبيض والبيج */
+            --card-bg: #ffffff; /* الكروت باللون الأبيض الصافي ليحدث فرق درجات بارز وممتاز */
+            --main-text: #1e293b; 
+            --desc-text: #64748b; 
+            --brand-orange: #e65100; 
+            --button-gray: #eaecf0; 
+            --white: #ffffff; 
+            --glass: rgba(255, 255, 255, 0.95);
+            --success: #2ecc71; 
+            --success-bg: rgba(46, 204, 113, 0.12);
+            --header-bg: #ffffff;
+            --card-shadow: 0 4px 14px rgba(30, 41, 59, 0.06); 
+            --border-color: #cbd5e1;
+            --input-bg: #f1f5f9;
         }
 
-        /* 🌙 مظهر الوضع الداكن */
-        body.dark-mode {
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --border: #334155;
+        /* الوضع الليلي المتناسق المباشر المضمون 100% */
+        [data-theme="dark"], body[data-theme="dark"] {
+            --bg: #0f172a !important; 
+            --card-bg: #1e293b !important; 
+            --main-text: #f8fafc !important;
+            --desc-text: #94a3b8 !important;
+            --brand-orange: #f97316 !important; 
+            --button-gray: #334155 !important; 
+            --white: #1e293b !important; 
+            --glass: rgba(30, 41, 59, 0.95) !important;
+            --header-bg: #1e293b !important;
+            --card-shadow: 0 6px 18px rgba(0,0,0,0.3) !important;
+            --border-color: #334155 !important;
+            --input-bg: #0f172a !important;
+            --success-bg: rgba(46, 204, 113, 0.2) !important;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; transition: background 0.1s, color 0.1s; }
-        body { background-color: var(--bg); color: var(--text-main); padding: 8px; font-size: 12px; position: relative; min-height: 100vh; }
-        
-        body.modal-open .main-content { filter: blur(6px); pointer-events: none; }
-        .container { max-width: 430px; margin: 0 auto; }
-        
-        header { display: flex; justify-content: space-between; align-items: center; margin: 6px 0 10px 0; }
-        header h1 { font-size: 15px; font-weight: 800; color: #2563eb; }
-        
-        .theme-toggle-btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        /* تأثير انتقالي ناعم جداً عند عكس الإضاءة */
+        body, header, main, footer, div, span, button, input {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
 
-        /* 📲 ستايل شريط التثبيت الفوري المخصص */
-        .pwa-install-bar { display: flex; background: linear-gradient(135deg, #1e3a8a, #2563eb); color: white; padding: 10px 14px; border-radius: var(--radius); margin-bottom: 10px; display: none; align-items: center; justify-content: space-between; font-weight: bold; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
-        .pwa-btn { background: #16a34a; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
+        /* تطبيق متغيرات الألوان على العناصر الهامة بالوضع الليلي */
+        [data-theme="dark"] .sticky-wrapper { background: var(--header-bg); }
+        [data-theme="dark"] .category-nav { background: var(--card-bg); border-bottom-color: var(--border-color); }
+        [data-theme="dark"] .restaurant-footer { background: var(--card-bg); border-top-color: var(--border-color); }
+        [data-theme="dark"] .footer-address-bar, [data-theme="dark"] .header-address-bar { background: var(--button-gray); border-color: var(--border-color); }
+        [data-theme="dark"] .food-card, [data-theme="dark"] .food-card-large { background: var(--card-bg); border-color: var(--border-color); }
+        [data-theme="dark"] .size-option { background: var(--button-gray); color: var(--main-text); }
+        [data-theme="dark"] .size-option.selected { background: var(--brand-orange); color: #ffffff; }
 
-        .notification-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 8px 12px; border-radius: var(--radius); margin-bottom: 8px; display: none; align-items: center; justify-content: space-between; font-size: 11px; font-weight: bold; }
-        body.dark-mode .notification-bar { background: #1e3a8a; border-color: #2563eb; color: #eff6ff; }
-        .notification-btn { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 10px; cursor: pointer; }
-
-        .search-container { margin-bottom: 8px; }
-        .search-input { width: 100%; padding: 8px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); font-size: 12px; outline: none; }
-
-        .renew-days-bar { display: flex; gap: 4px; margin-bottom: 8px; }
-        .renew-day-btn { flex: 1; background: #0f172a; color: white; border: none; padding: 8px 4px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; text-align: center; }
-        body.dark-mode .renew-day-btn { background: #334155; }
-
-        .tabs { display: flex; background: var(--border); padding: 2px; border-radius: var(--radius); margin-bottom: 8px; gap: 2px; }
-        .tab-btn { flex: 1; padding: 6px 4px; border: none; background: none; font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-main); border-radius: 10px; display: flex; flex-direction: column; align-items: center; }
-        .tab-btn span.count { font-size: 9px; background: var(--bg); padding: 1px 5px; border-radius: 20px; color: var(--text-main); margin-top: 2px; }
-        
-        .tab-btn.active { background: #2563eb; color: white; }
-        .tab-btn.active span.count { background: rgba(255, 255, 255, 0.3); color: white; }
-        
-        .tab-btn.vault-tab { color: #b45309; font-weight: 800; }
-        .tab-btn.vault-tab.active { background: #d97706; color: white; }
-
-        .section-content { display: none; }
-        .section-content.active { display: block; }
-
-        .subscribers-list { display: flex; flex-direction: column; gap: 6px; }
-        .user-card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); padding: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: transform 0.1s ease; position: relative; overflow: hidden; z-index: 1; }
-        
-        .user-card::before { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 5px; background: var(--border); }
-        .user-card.fully-paid::before { background: var(--success); }
-        .user-card.partial-paid::before { background: var(--warning); }
-        .user-card.unpaid::before { background: var(--danger); }
-        
-        .user-info-main { flex: 1; }
-        .user-info-main h3 { font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; padding-left: 10px; }
-        .debt-outside-tag { font-size: 11px; font-weight: bold; color: #dc2626; background: #fee2e2; padding: 2px 6px; border-radius: 6px; }
-        body.dark-mode .debt-outside-tag { background: #7f1d1d; color: #fca5a5; }
-        .no-debt-outside-tag { font-size: 11px; font-weight: bold; color: #16a34a; background: #dcfce7; padding: 2px 6px; border-radius: 6px; }
-        body.dark-mode .no-debt-outside-tag { background: #14532d; color: #86efac; }
-        
-        .countdown-text { font-size: 10px; color: var(--text-sub); margin-top: 2px; display: block; }
-        
-        .status-badge { font-size: 9px; padding: 2px 6px; border-radius: 6px; font-weight: 700; color: white; margin-right: 8px; }
-        .fully-paid .status-badge { background: var(--success); }
-        .partial-paid .status-badge { background: var(--warning); }
-        .unpaid .status-badge { background: var(--danger); }
-
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); 
-            display: none; justify-content: center; align-items: center; 
-            padding: 16px; z-index: 9999; 
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Cairo', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
         }
         
-        .modal-card { 
-            background: var(--card-bg); width: 100%; max-width: 380px; 
-            border-radius: 16px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 20px 40px rgba(0,0,0,0.3); 
-            animation: fadeInCenter 0.2s ease-out; position: relative;
+        body { 
+            background-color: var(--bg); 
+            color: var(--main-text); 
+            line-height: 1.4; 
+            overflow-x: hidden; 
+        }
+
+        /* ================= شاشة التحميل ================= */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #f5f2eb; 
+            z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
         }
         
-        @keyframes fadeInCenter { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
-        .modal-header h2 { font-size: 14px; font-weight: 800; }
-        .close-modal-btn { background: var(--bg); border: none; width: 28px; height: 28px; border-radius: 50%; font-weight: bold; cursor: pointer; color: var(--text-sub); display: flex; align-items: center; justify-content: center; font-size: 14px; }
-
-        .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 10px; }
-        .detail-item { background: var(--bg); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); }
-        .detail-item span { display: block; font-size: 9px; color: var(--text-sub); margin-bottom: 1px; }
-        .detail-item strong { color: var(--text-main); font-size: 13px; font-weight: 700; }
-
-        .actions-row { display: flex; gap: 6px; margin-bottom: 8px; }
-        .action-link { flex: 1; text-decoration: none; text-align: center; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; color: white; border: none; cursor: pointer; }
-        .btn-call { background: #16a34a; }
-        .btn-whatsapp { background: #25d366; }
-
-        .payment-action { display: flex; gap: 4px; margin-bottom: 6px; }
-        .payment-input { flex: 1; padding: 6px 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); border-radius: 8px; outline: none; font-size: 11px; }
-        .submit-pay-btn { background: #2563eb; color: white; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px; }
-
-        .cash-calc-box { background: #fff7ed; padding: 6px; border-radius: 8px; border: 1px solid #ffedd5; display: flex; justify-content: space-between; align-items: center; color: #7c2d12; font-size: 10px; margin-bottom: 8px; }
-        .history-box { background: var(--bg); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; max-height: 80px; overflow-y: auto; }
-        .history-title { font-weight: 700; color: var(--text-sub); margin-bottom: 4px; }
-        .timeline-item { position: relative; padding-right: 12px; margin-bottom: 4px; color: var(--text-main); font-size: 10px; }
-        .timeline-item::before { content: ''; position: absolute; right: 2px; top: 4px; width: 5px; height: 5px; background: var(--text-sub); border-radius: 50%; }
-
-        .vault-view { background: #0f172a; color: white; padding: 14px; border-radius: var(--radius); }
-        .vault-auth { display: flex; gap: 6px; justify-content: center; padding: 20px 0; }
-        .vault-input { padding: 8px; border-radius: 8px; border: none; width: 140px; text-align: center; font-size: 13px; outline: none; }
-        .vault-btn { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
-        .vault-content { display: none; }
-        .vault-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
-        .vault-card-item { background: #1e293b; padding: 12px; border-radius: 8px; border-right: 4px solid #38bdf8; }
-        .vault-card-item span { display: block; font-size: 10px; color: #94a3b8; margin-bottom: 3px; }
-        .vault-card-item strong { font-size: 16px; color: #38bdf8; }
+        .loader-content { text-align: center; padding: 20px; max-width: 90%; display: flex; flex-direction: column; align-items: center; }
         
-        .eye-btn { width: 100%; background: #334155; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-weight: bold; }
-        .no-results { text-align: center; padding: 20px; color: var(--text-sub); background: var(--card-bg); border-radius: var(--radius); }
+        .loader-logo-final {
+            width: 180px; 
+            height: 180px; 
+            margin-bottom: 25px;
+            background-image: url('./images/logooo.png');
+            background-size: contain; 
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 12px; 
+            animation: bounceInEntry 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform: scale(0);
+            box-shadow: 0 8px 24px rgba(230, 81, 0, 0.15);
+        }
         
-        .admin-bar { display: flex; gap: 4px; margin-bottom: 8px; }
-        .admin-add-btn { flex: 2; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
-        .backup-btn { flex: 1; background: #475569; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; }
+        @keyframes bounceInEntry {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .loader-text { font-weight: 800; color: #1e293b; font-size: 1.4rem; margin-bottom: 6px; animation: fadeInUp 0.8s ease-out forwards 0.3s; opacity: 0; }
+        .loader-slogan { font-size: 0.85rem; font-weight: 700; line-height: 1.4; color: var(--brand-orange); animation: fadeInUp 0.8s ease-out forwards 0.5s; opacity: 0; }
+        @keyframes fadeInUp { to { transform: translateY(0); opacity: 1; } }
+        .loader-counter { font-size: 1.1rem; font-weight: 800; color: #1e293b; margin-top: 15px; font-variant-numeric: tabular-nums; }
+        .loading-bar { width: 130px; height: 4px; background: rgba(30, 41, 59, 0.12); margin: 10px auto 0 auto; border-radius: 10px; overflow: hidden; }
+        .loading-bar span { display: block; width: 0; height: 100%; background: linear-gradient(90deg, var(--brand-orange) 0%, #f97316 100%); box-shadow: 0 0 8px var(--brand-orange); border-radius: 10px; }
+        .splash-hidden { transform: translateY(-100%); pointer-events: none; }
+
+        /* ================= الهيدر الداخلي ================= */
+        .sticky-wrapper { position: sticky; top: 0; z-index: 1000; background: var(--header-bg); box-shadow: 0 1px 10px rgba(0,0,0,0.03); }
+        header { display: flex; flex-direction: column; align-items: center; padding: 6px 0 4px 0; position: relative; }
+        .header-top { width: 100%; display: flex; align-items: center; justify-content: center; position: relative; margin-top: 4px; }
+        
+        .header-logo-final { 
+            width: 120px; 
+            height: 120px; 
+            background-image: url('./images/logooo.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 10px;
+            box-shadow: 0 4px 14px rgba(30, 41, 59, 0.05);
+        }
+        
+        .header-left-actions { position: absolute; left: 16px; top: 6px; display: flex; align-items: center; }
+        .header-right-actions { position: absolute; right: 16px; top: 6px; display: flex; align-items: center; }
+
+        .cart-trigger, .theme-trigger { 
+            background: var(--button-gray); 
+            color: var(--main-text); 
+            width: 42px; 
+            height: 42px; 
+            border-radius: 14px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            font-size: 1.18rem; 
+            border: none; 
+            position: relative; 
+        }
+        .badge { position: absolute; top: -3px; right: -3px; background: var(--brand-orange); color: #ffffff; font-size: 8px; font-weight: 800; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--white); transform: scale(0); }
+        .badge.show { transform: scale(1); }
+
+        /* بنر العنوان */
+        .header-address-bar {
+            font-size: 0.78rem; 
+            font-weight: 700;
+            color: var(--main-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin: 8px 16px 4px 16px;
+            padding: 8px 12px;
+            background: #eceef1;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            align-self: stretch;
+            text-align: center;
+        }
+
+        /* ================= ستايل بانر التثبيت المنبثق التلقائي ================= */
+        .install-banner-popup {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150px);
+            width: 92%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border: 2px solid var(--brand-orange);
+            border-radius: 20px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 9998;
+            opacity: 0;
+            pointer-events: none;
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease;
+        }
+        .install-banner-popup.show-banner {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .banner-left { display: flex; align-items: center; gap: 12px; text-align: right; }
+        .banner-logo-mini { width: 48px; height: 48px; background-image: url('./images/logooo.png'); background-size: contain; background-repeat: no-repeat; background-position: center; border-radius: 8px; }
+        .banner-title { font-size: 0.9rem; font-weight: 800; color: var(--main-text); }
+        .banner-desc { font-size: 0.72rem; font-weight: 700; color: var(--desc-text); margin-top: 2px; }
+        
+        .banner-actions { display: flex; align-items: center; gap: 8px; }
+        .banner-btn-install { background: var(--brand-orange); color: #ffffff; border: none; padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(230, 81, 0, 0.2); }
+        .banner-btn-close { background: transparent; color: var(--desc-text); border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; font-weight: bold; }
+
+        /* شريط الأقسام */
+        .category-nav { display: flex; overflow-x: auto; white-space: nowrap; padding: 14px 16px; gap: 16px; scrollbar-width: none; background: var(--white); border-bottom: 1px solid var(--border-color); }
+        .category-nav::-webkit-scrollbar { display: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 76px; cursor: pointer; }
+        .cat-img-box { width: 68px; height: 68px; border-radius: 20px; background: var(--white); overflow: hidden; border: 2px solid transparent; box-shadow: 0 4px 8px rgba(0,0,0,0.03); }
+        .cat-img-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .cat-item.active .cat-img-box { border-color: var(--brand-orange); border-width: 2.5px; transform: scale(1.03); }
+        .cat-item span { font-size: 0.76rem; font-weight: 800; color: var(--desc-text); margin-top: 6px; } 
+        .cat-item.active span { color: var(--main-text); font-weight: 900; }
+
+        /* ================= كروت الأصناف الأساسية ================= */
+        .menu-list { 
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 20px 16px 14px 16px; 
+            max-width: 600px; 
+            margin: auto; 
+            min-height: 400px; 
+        }
+
+        .add-btn { 
+            background: var(--brand-orange); 
+            color: #ffffff; 
+            border: 1px solid transparent; 
+            width: 96px; 
+            height: 32px; 
+            border-radius: 10px; 
+            font-size: 0.78rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 800; 
+            box-shadow: 0 2px 8px rgba(230, 81, 0, 0.12);
+            white-space: nowrap;
+        }
+        .add-btn:active { transform: scale(0.95); }
+
+        .add-btn.success-state { 
+            background-color: var(--success-bg) !important; 
+            color: var(--success) !important;
+            border: 1px solid rgba(46, 204, 113, 0.3) !important;
+            box-shadow: none !important;
+            pointer-events: none; 
+            font-size: 0.72rem;
+        }
+
+        /* 1. كارت الصنف الصغير */
+        .food-card { 
+            background: var(--white); 
+            border-radius: 18px; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 8px 12px; 
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            gap: 4px; 
+            position: relative;
+        }
+
+        .card-top-content {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .card-image-wrapper {
+            width: 75px; 
+            height: 75px;
+            border-radius: 12px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: #f1f5f9;
+        }
+
+        .food-card .item-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+        }
+
+        .card-details-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            text-align: right;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .food-name { 
+            font-weight: 800; 
+            font-size: 0.95rem; 
+            color: var(--main-text); 
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis; 
+            width: 100%;
+            margin-bottom: 2px; 
+        }
+
+        .food-ingredients {
+            font-size: 0.65rem; 
+            color: var(--desc-text);
+            font-weight: 600;
+            line-height: 1.25;
+        }
+
+        .size-selector { 
+            display: flex; 
+            gap: 5px; 
+            margin-top: 1px;
+        }
+
+        .size-option { 
+            font-size: 0.62rem; 
+            font-weight: 800; 
+            padding: 3px 6px; 
+            border-radius: 6px; 
+            background: #f1f5f9; 
+            cursor: pointer; 
+            color: var(--main-text); 
+            text-align: center;
+            white-space: nowrap;
+            border: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .size-option.selected { 
+            background: var(--brand-orange); 
+            color: #ffffff; 
+            border-color: var(--brand-orange);
+        }
+
+        .food-card .card-bottom-content {
+            display: flex;
+            flex-direction: row; 
+            justify-content: space-between; 
+            align-items: center;
+            width: 100%;
+            margin-top: 2px;
+        }
+
+        .food-card .btn-wrapper { order: 2; }
+        .food-card .price-container-leftish { order: 1; padding-right: 2px; }
+
+        .food-price { 
+            font-weight: 900; 
+            color: var(--brand-orange); 
+            font-size: 1.05rem; 
+            display: inline-flex; 
+            align-items: baseline; 
+            gap: 1px; 
+        }
+
+        .price-num { font-weight: 900; }
+        .price-txt { font-size: 0.65rem; font-weight: 800; color: var(--brand-orange); }
+
+        /* ================= 2. كروت الأصناف الكبيرة ================= */
+        .food-card-large {
+            background: var(--white);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border-color);
+            position: relative;
+            width: 100%;
+        }
+
+        .card-large-image-wrapper {
+            width: 100%;
+            overflow: hidden;
+            background: transparent;
+            padding: 10px 12px 4px 12px; 
+        }
+
+        .card-large-image-wrapper .item-img-large {
+            width: 100%;
+            display: block;
+            aspect-ratio: 600 / 270; 
+            object-fit: cover;
+            border-radius: 12px; 
+        }
+
+        .card-large-details {
+            display: flex;
+            flex-direction: column;
+            padding: 8px 12px 12px 12px;
+            gap: 4px;
+            text-align: right;
+        }
+
+        .food-name-large {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--main-text);
+            line-height: 1.3;
+        }
+
+        .food-ingredients-large {
+            font-size: 0.68rem;
+            color: var(--desc-text);
+            font-weight: 600;
+            line-height: 1.3;
+            margin-top: 1px;
+        }
+
+        .card-large-footer {
+            display: flex;
+            flex-direction: row; 
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 4px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(100, 116, 139, 0.12);
+        }
+
+        .food-card-large .price-container-leftish { order: 1; }
+        .food-card-large .btn-wrapper { order: 2; }
+
+        .fly-item {
+            position: fixed;
+            font-size: 1.5rem;
+            z-index: 9999;
+            pointer-events: none;
+            transition: left 0.6s cubic-bezier(0.25, 1, 0.5, 1), top 0.6s cubic-bezier(0.25, 1, 0.5, 1), transform 0.6s ease, opacity 0.6s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: scale(1); }
+            20%, 60% { transform: scale(1.1) rotate(-6deg); }
+            40%, 80% { transform: scale(1.1) rotate(6deg); }
+        }
+        .cart-trigger.shake { animation: shake 0.5s ease-in-out; }
+
+        /* ================= خانة تثبيت التطبيق السفلية ================= */
+        .footer-install-box {
+            background: linear-gradient(135deg, var(--brand-orange) 0%, #f97316 100%);
+            border-radius: 16px;
+            padding: 16px;
+            margin: 15px auto 20px auto;
+            max-width: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            box-shadow: 0 6px 20px rgba(230, 81, 0, 0.2);
+            color: #ffffff;
+            text-align: right;
+            display: none; /* تظهر فقط عند إتاحة التثبيت */
+        }
+        .footer-install-info { display: flex; align-items: center; gap: 10px; }
+        .footer-install-logo { width: 44px; height: 44px; background-image: url('./images/logooo.png'); background-size: contain; background-repeat: no-repeat; background-position: center; border-radius: 8px; background-color: #ffffff; }
+        .footer-install-title { font-size: 0.88rem; font-weight: 800; }
+        .footer-install-desc { font-size: 0.72rem; font-weight: 600; opacity: 0.9; margin-top: 1px; }
+        .footer-install-btn { background: #ffffff; color: var(--brand-orange); border: none; padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 900; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.08); transition: transform 0.2s; }
+        .footer-install-btn:active { transform: scale(0.95); }
+
+        .restaurant-footer { padding: 25px 15px; text-align: center; background: var(--white); border-top: 1px solid var(--border-color); margin-top: 25px; padding-bottom: 35px; }
+        
+        .footer-address-bar {
+            font-size: 0.78rem; 
+            font-weight: 700;
+            color: var(--main-text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin-bottom: 15px;
+            padding: 8px;
+            background: #eceef1;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .footer-address-label { color: #3b82f6; font-weight: 800; }
+
+        .footer-phones a { display: inline-block; color: var(--desc-text); text-decoration: none; font-weight: 800; font-size: 0.95rem; margin: 4px 8px; }
+        .footer-rights { font-size: 0.68rem; color: var(--main-text); font-weight: 600; margin-bottom: 5px; }
+        .dev-credit { font-size: 0.72rem; color: var(--desc-text); font-weight: 700; }
+        .dev-credit a { color: var(--brand-orange); text-decoration: none; display: block; margin-top: 3px; }
+
+        /* السلة والـ Modals */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: flex-end; backdrop-filter: blur(4px); }
+        .modal-content { background: var(--white); width: 100%; max-width: 480px; padding: 16px 20px; border-radius: 22px 22px 0 0; max-height: 82vh; overflow-y: auto; color: var(--main-text); box-shadow: 0 -5px 25px rgba(0,0,0,0.25); }
+
+        .cart-item-card { display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: rgba(100, 116, 139, 0.06); border-radius: 12px; margin-bottom: 8px; }
+        .cart-item-img { width: 42px; height: 42px; border-radius: 8px; object-fit: cover; }
+        .cart-item-info { flex: 1; }
+        .cart-item-name { font-weight: 700; font-size: 0.8rem; } 
+        .cart-item-size { font-size: 0.65rem; color: var(--desc-text); display: block; }
+        .cart-item-price { color: var(--brand-orange); font-weight: 800; font-size: 0.75rem; display: block; }
+        .remove-btn { color: #ff4d4d; font-weight: 800; font-size: 0.7 r em; cursor: pointer; padding: 4px; }
+        
+        .user-fields input { background: var(--input-bg); border: 1px solid transparent; padding: 10px 12px; border-radius: 10px; width: 100%; margin-bottom: 8px; color: var(--main-text); text-align: right; font-size: 0.8rem; }
+        .user-fields input::placeholder { color: var(--desc-text); opacity: 0.8; }
+        .user-fields input:focus { border-color: var(--brand-orange); outline: none; }
+        
+        .order-type-container { margin-bottom: 12px; text-align: right; }
+        .order-type-title { font-size: 0.72rem; font-weight: 800; color: var(--desc-text); display: block; margin-bottom: 6px; }
+        .order-type-toggle { display: flex; gap: 10px; width: 100%; }
+        .type-btn { flex: 1; padding: 8px; border-radius: 10px; border: 1.5px solid var(--border-color); background: var(--input-bg); color: var(--main-text); font-weight: 800; font-size: 0.78rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; }
+        .type-btn.active { background: var(--brand-orange); color: #ffffff; border-color: var(--brand-orange); }
+
+        .submit-btn { background: var(--brand-orange); color: #ffffff; border: none; padding: 12px; border-radius: 12px; width: 100%; font-weight: 800; font-size: 0.9rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="main-content">
-    <div class="container">
-        <header>
-            <h1>نظام إدارة المشتركين</h1>
-            <button class="theme-toggle-btn" onclick="toggleTheme()">🌙 وضع الليل</button>
-        </header>
-
-        <div class="pwa-install-bar" id="pwaInstallBar">
-            <span>✨ ثبت التطبيق على شاشتك الرئيسية الآن:</span>
-            <button class="pwa-btn" id="pwaInstallBtn">📲 تثبيت</button>
+    <!-- شاشة التحميل -->
+    <div id="splash-screen">
+        <div class="loader-content">
+            <div class="loader-logo-final"></div>
+            <h2 class="loader-text">كباب صلاح</h2>
+            <p class="loader-slogan">أصل الكباب.. أصل الطعم 🥩🔥</p>
+            <div class="loader-counter" id="loadCounter">0%</div>
+            <div class="loading-bar"><span id="loadProgress"></span></div>
         </div>
+    </div>
 
-        <div class="notification-bar" id="notificationBar">
-            <span id="notificationText">يوجد اليوم مشتركين تجديدهم اليوم!</span>
-            <button class="notification-btn" onclick="filterByTodayRenewals()">عرض المشتركين 🔍</button>
-        </div>
-
-        <div class="admin-bar">
-            <button class="admin-add-btn" onclick="openAddSubscriberModal()">➕ إضافة مشترك جديد</button>
-            <button class="backup-btn" onclick="downloadBackup()">📥 نسخ احتياطي</button>
-            <button class="backup-btn" style="background:#0f172a;" onclick="triggerUploadBackup()">📤 استعادة</button>
-            <input type="file" id="backupFile" style="display:none;" onchange="uploadBackup(event)">
-        </div>
-
-        <div class="renew-days-bar">
-            <button class="renew-day-btn" onclick="autoRenewByDay(8)">🔄 تجديد يوم 8</button>
-            <button class="renew-day-btn" onclick="autoRenewByDay(11)">🔄 تجديد يوم 11</button>
-            <button class="renew-day-btn" onclick="autoRenewByDay(25)">🔄 تجديد يوم 25</button>
-        </div>
-
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="ابحث باسم العميل..." oninput="handleSearch()">
-        </div>
-
-        <div class="tabs">
-            <button class="tab-btn active" id="tab-all" onclick="switchTab('all')">الكل <span class="count" id="count-all">0</span></button>
-            <button class="tab-btn" id="tab-unpaid" onclick="switchTab('unpaid')">لم يدفع <span class="count" id="count-unpaid">0</span></button>
-            <button class="tab-btn" id="tab-partial" onclick="switchTab('partial')">جزئي <span class="count" id="count-partial">0</span></button>
-            <button class="tab-btn" id="tab-paid" onclick="switchTab('paid')">كامل <span class="count" id="count-paid">0</span></button>
-            <button class="tab-btn vault-tab" id="tab-vault" onclick="switchTab('vault')">🔒 الخزنة</button>
-        </div>
-
-        <div id="list-section" class="section-content active">
-            <div id="subscribersList" class="subscribers-list"></div>
-        </div>
-
-        <div id="vault-section" class="section-content">
-            <div class="vault-view">
-                <div class="vault-auth" id="vaultAuthBox">
-                    <input type="password" id="vaultPassword" class="vault-input" placeholder="أدخل الرمز السري">
-                    <button class="vault-btn" onclick="unlockVault()">فتح</button>
-                </div>
-                <div class="vault-content" id="vaultContent">
-                    <button class="eye-btn" onclick="toggleNumbersVisibility()">👁️ كشف / إخفاء الحسابات</button>
-                    <div class="vault-grid">
-                        <div class="vault-card-item" style="border-right-color: #16a34a;">
-                            <span>💰 إجمالي الكاش الفعلي (اللي في جيبك حالياً)</span>
-                            <strong id="v-cash">****</strong>
-                        </div>
-                        <div class="vault-card-item" style="border-right-color: #dc2626;">
-                            <span>💸 ديون قديمة متأخرة (باقية من شهور سابقة)</span>
-                            <strong id="v-old-debts">****</strong>
-                        </div>
-                        <div class="vault-card-item" style="border-right-color: #d97706;">
-                            <span>🔴 متبقي باقات الشهر الحالي (متبقي حساب باقة الشهر ده)</span>
-                            <strong id="v-current-debt">****</strong>
-                        </div>
-                    </div>
-                </div>
+    <!-- ================= بانر التثبيت المنبثق التلقائي ================= -->
+    <div class="install-banner-popup" id="automaticInstallBanner">
+        <div class="banner-left">
+            <div class="banner-logo-mini"></div>
+            <div>
+                <div class="banner-title">تطبيق كباب صلاح الرسمي</div>
+                <div class="banner-desc">ثبته الآن لتجربة تصفح أسرع وأسهل 🔥</div>
             </div>
         </div>
-    </div>
-</div>
-
-<div class="modal-overlay" id="detailsModal" onclick="closeModalOutside(event)">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h2 id="m-name">اسم المشترك</h2>
-            <button class="close-modal-btn" onclick="closeModal()">✕</button>
-        </div>
-        
-        <div class="modal-grid">
-            <div class="detail-item"><span>📅 ميعاد تجديده في الشهر</span><strong id="m-renew-day">0</strong></div>
-            <div class="detail-item"><span>💵 باقة الشهر الحالي</span><strong id="m-price">0 ج</strong></div>
-            <div class="detail-item"><span>🛑 ديون قديمة متأخرة</span><strong id="m-debt">0 ج</strong></div>
-            <div class="detail-item"><span>✅ تم سداده هذا الشهر</span><strong id="m-paid" style="color: #16a34a;">0 ج</strong></div>
-            <div class="detail-item" style="grid-column: span 2; background: #f1f5f9;"><span>🚨 مجموع المتبقي النهائي عليه</span><strong id="m-remaining">0 ج</strong></div>
-        </div>
-
-        <div class="actions-row">
-            <a href="#" id="m-link-call" class="action-link btn-call">📞 رن مكالمة</a>
-            <a href="#" id="m-link-wa" target="_blank" class="action-link btn-whatsapp">💬 تذكير واتساب</a>
-        </div>
-
-        <div class="payment-action">
-            <input type="number" class="payment-input" id="m-pay-input" placeholder="ادخل المبلغ للخصم فوري..." oninput="calcModalCashFees()">
-            <button class="submit-pay-btn" id="m-pay-btn">دفع الآن</button>
-        </div>
-
-        <div class="cash-calc-box" id="m-calc-box" style="display:none;">
-            <span>فودافون كاش شامل الرسوم (+1%):</span>
-            <strong id="m-calc-text">0 ج</strong>
-        </div>
-
-        <div class="history-box">
-            <div class="history-title">📜 سجل العمليات هذا الشهر:</div>
-            <div id="m-history-content"></div>
-        </div>
-
-        <div class="actions-row" style="margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; gap: 4px;">
-            <button class="action-link" style="background: #e2e8f0; color: #0f172a; font-size: 10px;" onclick="openEditModalFromDetails()">✏️ تعديل البيانات</button>
-            <button class="action-link" style="background: #dc2626; color: white; font-size: 10px;" onclick="deleteActiveSubscriber()">❌ حذف العميل نهائياً</button>
+        <div class="banner-actions">
+            <button class="banner-btn-install" id="actionInstallBtn">تثبيت</button>
+            <button class="banner-btn-close" id="actionCloseBtn">✕</button>
         </div>
     </div>
-</div>
 
-<div class="modal-overlay" id="addModal" onclick="closeAddModalOutside(event)">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h2>➕ إضافة مشترك جديد للسيستم</h2>
-            <button class="close-modal-btn" onclick="closeAddModal()">✕</button>
-        </div>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-            <input type="text" id="add-name" class="search-input" placeholder="اسم المشترك ثلاثي...">
-            <input type="text" id="add-phone" class="search-input" placeholder="رقم الموبايل...">
-            <input type="number" id="add-renew" class="search-input" placeholder="يوم التجديد في الشهر (مثلاً: 8)...">
-            <input type="number" id="add-price" class="search-input" placeholder="سعر باقة الاشتراك (مثلاً: 150)...">
-            <input type="number" id="add-debt" class="search-input" placeholder="ديون قديمة متأخرة عليه (إن وجد)...">
-            <button class="btn" style="background: #16a34a; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; width:100%;" onclick="submitAddSubscriber()">حفظ وإضافة للسيستم</button>
-        </div>
+    <div class="sticky-wrapper">
+        <header>
+            <div class="header-right-actions">
+                <button class="theme-trigger" onclick="toggleTheme()" id="themeBtn" title="تغيير المظهر">
+                    <span id="themeIcon">🌙</span>
+                </button>
+            </div>
+
+            <div class="header-top">
+                <div class="header-logo-final"></div>
+            </div>
+
+            <div class="header-address-bar">
+                <span class="header-address-label">📍 العنوان:</span>
+                <span class="header-address-text">500 شارع بورسعيد - باب الشعرية - القاهرة</span>
+            </div>
+
+            <div class="header-left-actions">
+                <button class="cart-trigger" onclick="toggleCart(true)" id="cartBtn">
+                    <span class="badge" id="cartBadge">0</span>
+                    <span>🛒</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="category-nav" id="catNav"></div>
     </div>
-</div>
 
-<div class="modal-overlay" id="editModal" onclick="closeEditModalOutside(event)">
-    <div class="modal-card">
-        <div class="modal-header">
-            <h2>✏️ تعديل بيانات العميل</h2>
-            <button class="close-modal-btn" onclick="closeEditModal()">✕</button>
+    <main id="menuList" class="menu-list"></main>
+
+    <footer class="restaurant-footer">
+        <div class="footer-address-bar">
+            <span class="footer-address-label">📍 العنوان:</span>
+            <span class="footer-address-text">500 شارع بورسعيد - باب الشعرية - القاهرة</span>
         </div>
-        <div style="display: flex; flex-direction: column; gap: 6px;">
-            <label style="font-size: 10px; font-weight: bold;">الاسم:</label>
-            <input type="text" id="edit-name" class="search-input">
-            
-            <label style="font-size: 10px; font-weight: bold;">رقم الهاتف:</label>
-            <input type="text" id="edit-phone" class="search-input">
-            
-            <label style="font-size: 10px; font-weight: bold;">يوم التجديد في الشهر:</label>
-            <input type="number" id="edit-renew" class="search-input">
-            
-            <label style="font-size: 10px; font-weight: bold;">سعر باقة الاشتراك:</label>
-            <input type="number" id="edit-price" class="search-input">
-            
-            <label style="font-size: 10px; font-weight: bold;">ديون قديمة مرحلة:</label>
-            <input type="number" id="edit-debt" class="search-input">
 
-            <label style="font-size: 10px; font-weight: bold;">المدفوع الفعلي هذا الشهر:</label>
-            <input type="number" id="edit-paid" class="search-input">
-
-            <label style="display: flex; align-items: center; gap: 6px; margin: 8px 0; font-weight: bold; color:#dc2626; cursor:pointer;">
-                <input type="checkbox" id="edit-disable-wa" style="width: 16px; height: 16px;">
-                ❌ إلغاء تفعيل تنبيهات الواتساب لهذا العميل (رقم ملهوش واتس)
-            </label>
-            
-            <button class="btn" style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; width:100%;" onclick="submitEditSubscriber()">حفظ التعديلات الجديدة</button>
+        <div class="footer-phones">
+            <span style="font-weight: 800; font-size: 0.8rem; display: block; margin-bottom: 5px;">📞 أرقام الدليفري:</span>
+            <a href="tel:01111173444">01111173444</a>
+            <a href="tel:0225926228">0225926228</a>
+            <a href="tel:0225926227">0225926227</a>
         </div>
-    </div>
-</div>
 
-<script>
-    const ADMIN_PIN = "5566"; 
-
-    // لستة المشتركين الـ 47 الأساسية الموثقة[span_0](start_span)[span_0](end_span)
-    const defaultSubscribers = [
-        { id: 1, name: "رمضان الطوخي", phone: "0102511199", renewDay: 8, packagePrice: 150, previousDebt: 30, currentPaid: 180, history: ["سداد عند البداية: 180 ج"], disableWA: false },
-        { id: 2, name: "وائل خس", phone: "01004929579", renewDay: 18, packagePrice: 180, previousDebt: 140, currentPaid: 320, history: ["سداد عند البداية: 320 ج"], disableWA: false },
-        { id: 3, name: "صبري ونيس", phone: "01001010100", renewDay: 15, packagePrice: 100, previousDebt: 100, currentPaid: 100, history: ["سداد عند البداية: 100 ج"], disableWA: false },
-        { id: 4, name: "عبد الله ميزان", phone: "01007579677", renewDay: 29, packagePrice: 140, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"], disableWA: false },
-        { id: 5, name: "تامر الميكانيكي", phone: "01062581056", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"], disableWA: false },
-        { id: 6, name: "فرج", phone: "01067996668", renewDay: 8, packagePrice: 120, previousDebt: 0, currentPaid: 100, history: ["سداد عند البداية: 100 ج"], disableWA: false },
-        { id: 7, name: "شعبان تبع هاني سعيد", phone: "01016547117", renewDay: 12, packagePrice: 100, previousDebt: 220, currentPaid: 46, history: ["سداد عند البداية: 46 ج"], disableWA: false },
-        { id: 8, name: "أم العربي", phone: "01022248592", renewDay: 8, packagePrice: 150, previousDebt: 220, currentPaid: 60, history: ["سداد عند البداية: 60 ج"], disableWA: false },
-        { id: 9, name: "محمد فوده", phone: "01062951069", renewDay: 8, packagePrice: 140, previousDebt: 150, currentPaid: 120, history: ["سداد عند البداية: 120 ج"], disableWA: false },
-        { id: 10, name: "أحمد عزام", phone: "01090967912", renewDay: 15, packagePrice: 120, previousDebt: 0, currentPaid: 60, history: ["سداد عند البداية: 60 ج"], disableWA: false },
-        { id: 11, name: "عوض صادرات", phone: "01022355009", renewDay: 18, packagePrice: 150, previousDebt: 100, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false },
-        { id: 12, name: "ماهر فلفل", phone: "01011157222", renewDay: 12, packagePrice: 150, previousDebt: 200, currentPaid: 145, history: ["سداد عند البداية: 145 ج"], disableWA: false },
-        { id: 13, name: "أحمد الجزار", phone: "01022225883", renewDay: 12, packagePrice: 150, previousDebt: 400, currentPaid: 44, history: ["سداد عند البداية: 44 ج"], disableWA: false },
-        { id: 14, name: "هيما", phone: "01009185556", renewDay: 10, packagePrice: 150, previousDebt: 120, currentPaid: 215, history: ["سداد عند البداية: 215 ج"], disableWA: false },
-        { id: 15, name: "حج صلاح", phone: "01062667291", renewDay: 10, packagePrice: 150, previousDebt: 140, currentPaid: 62, history: ["سداد عند البداية: 62 ج"], disableWA: false },
-        { id: 16, name: "سعيد خام", phone: "0100961186", renewDay: 8, packagePrice: 100, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false },
-        { id: 17, name: "أيمن فتحي", phone: "01002094299", renewDay: 8, packagePrice: 150, previousDebt: 160, currentPaid: 300, history: ["سداد عند البداية: 300 ج"], disableWA: false },
-        { id: 18, name: "خالد سلام", phone: "01027850269", renewDay: 8, packagePrice: 100, previousDebt: 250, currentPaid: 40, history: ["سداد عند البداية: 40 ج"], disableWA: false },
-        { id: 19, name: "صبري سالم", phone: "01010199225", renewDay: 8, packagePrice: 100, previousDebt: 100, currentPaid: 45, history: ["سداد عند البداية: 45 ج"], disableWA: false },
-        { id: 20, name: "إيهاب", phone: "01090550088", renewDay: 8, packagePrice: 150, previousDebt: 25, currentPaid: 0, history: [], disableWA: false },
-        { id: 21, name: "هاني سعيد", phone: "01023220449", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 24, history: ["سداد عند البداية: 24 ج"], disableWA: false },
-        { id: 22, name: "علي مخزن", phone: "01069062402", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 90, history: ["سداد عند البداية: 90 ج"], disableWA: false },
-        { id: 23, name: "محمد ممدوح", phone: "01015099448", renewDay: 8, packagePrice: 150, previousDebt: 0, currentPaid: 0, history: [], disableWA: false },
-        { id: 24, name: "خيري عيد", phone: "01062559171", renewDay: 11, packagePrice: 150, previousDebt: 85, currentPaid: 125, history: ["سداد عند البداية: 125 ج"], disableWA: false },
-        { id: 25, name: "نورا فنوش", phone: "01055556679", renewDay: 8, packagePrice: 100, previousDebt: 30, currentPaid: 85, history: ["سداد عند البداية: 85 ج"], disableWA: false },
-        { id: 26, name: "محمد خليل امن", phone: "01012912229", renewDay: 11, packagePrice: 100, previousDebt: 150, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false },
-        { id: 27, name: "سالم خس", phone: "01014445987", renewDay: 8, packagePrice: 150, previousDebt: 225, currentPaid: 225, history: ["سداد عند البداية: 225 ج"], disableWA: false },
-        { id: 28, name: "سعد فلفل", phone: "01091999512", renewDay: 15, packagePrice: 85, previousDebt: 120, currentPaid: 0, history: [], disableWA: false },
-        { id: 29, name: "عصام فلفل", phone: "01061110033", renewDay: 16, packagePrice: 120, previousDebt: 140, currentPaid: 90, history: ["سداد عند البداية: 90 ج"], disableWA: false },
-        { id: 30, name: "خيري فلفل", phone: "01032348502", renewDay: 8, packagePrice: 130, previousDebt: 140, currentPaid: 215, history: ["سداد عند البداية: 215 ج"], disableWA: false },
-        { id: 31, name: "هاني عبد النبي", phone: "0100856804", renewDay: 15, packagePrice: 150, previousDebt: 100, currentPaid: 45, history: ["سداد عند البداية: 45 ج"], disableWA: false },
-        { id: 32, name: "محمود فوزي", phone: "01061559128", renewDay: 12, packagePrice: 140, previousDebt: 100, currentPaid: 210, history: ["سداد عند البداية: 210 ج"], disableWA: false },
-        { id: 33, name: "محمود جويه", phone: "01064028626", renewDay: 12, packagePrice: 150, previousDebt: 140, currentPaid: 27, history: ["سداد عند البداية: 27 ج"], disableWA: false },
-        { id: 34, name: "جمعه ارض الموالح", phone: "01069245505", renewDay: 17, packagePrice: 150, previousDebt: 150, currentPaid: 85, history: ["سداد عند البداية: 85 ج"], disableWA: false },
-        { id: 35, name: "عصام الزلباني", phone: "01022296429", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 190, history: ["سداد عند البداية: 190 ج"], disableWA: false },
-        { id: 36, name: "أحمد عبد المقصود", phone: "01092308201", renewDay: 15, packagePrice: 150, previousDebt: 150, currentPaid: 85, history: ["سداد عند البداية: 85 ج"], disableWA: false },
-        { id: 37, name: "جمال حسن", phone: "0106461564", renewDay: 8, packagePrice: 150, previousDebt: 150, currentPaid: 150, history: ["سداد عند البداية: 150 ج"], disableWA: false },
-        { id: 38, name: "إيهاب عرفه امن", phone: "0102268015", renewDay: 15, packagePrice: 150, previousDebt: 150, currentPaid: 315, history: ["سداد عند البداية: 315 ج"], disableWA: false },
-        { id: 39, name: "هاني نجم", phone: "01062144662", renewDay: 25, packagePrice: 150, previousDebt: 150, currentPaid: 225, history: ["سداد عند البداية: 225 ج"], disableWA: false },
-        { id: 40, name: "كرم عفشه", phone: "01028757912", renewDay: 15, packagePrice: 150, previousDebt: 140, currentPaid: 24, history: ["سداد عند البداية: 24 ج"], disableWA: false },
-        { id: 41, name: "رزة", phone: "01068222606", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 0, history: [], disableWA: false },
-        { id: 42, name: "نادي", phone: "01067145559", renewDay: 24, packagePrice: 100, previousDebt: 120, currentPaid: 120, history: ["سداد عند البداية: 120 ج"], disableWA: false },
-        { id: 43, name: "المهندس", phone: "01010061105", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false },
-        { id: 44, name: "نور صيانه", phone: "01015525585", renewDay: 16, packagePrice: 150, previousDebt: 140, currentPaid: 0, history: [], disableWA: false },
-        { id: 45, name: "احمد الفهيمي", phone: "01090299940", renewDay: 8, packagePrice: 150, previousDebt: 140, currentPaid: 0, history: [], disableWA: false },
-        { id: 46, name: "تبع عادل المقاول", phone: "04942", renewDay: 8, packagePrice: 150, previousDebt: 120, currentPaid: 460, history: ["سداد عند البداية: 460 ج"], disableWA: false },
-        { id: 47, name: "ابو محي", phone: "01025425511", renewDay: 12, packagePrice: 150, previousDebt: 120, currentPaid: 75, history: ["سداد عند البداية: 75 ج"], disableWA: false }
-    ];
-
-    let subscribers = [];
-    let currentTab = 'all'; let searchQuery = ''; let isVaultUnlocked = false; let showNumbers = false; let activeSubId = null;
-    let deferredPrompt = null; 
-
-    function initData() {
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then(() => console.log("PWA Active!"));
-        }
-
-        const storedTheme = localStorage.getItem('theme_pref_v6');
-        if (storedTheme === 'dark') {
-            document.body.classList.add('dark-mode');
-            document.querySelector('.theme-toggle-btn').innerText = "☀️ وضع النهار";
-        }
-
-        const stored = localStorage.getItem('local_subscribers_v7');
-        if (stored) {
-            subscribers = JSON.parse(stored);
-        } else {
-            subscribers = defaultSubscribers;[span_1](start_span)[span_1](end_span)
-            saveData();
-        }
-        render();
-        checkTodayRenewals(); 
-    }
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('pwaInstallBar').style.display = 'flex';
-    });
-
-    document.getElementById('pwaInstallBtn').addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            document.getElementById('pwaInstallBar').style.display = 'none'; 
-        }
-        deferredPrompt = null;
-    });
-
-    window.addEventListener('appinstalled', () => {
-        document.getElementById('pwaInstallBar').style.display = 'none';
-        deferredPrompt = null;
-    });
-
-    function saveData() {
-        localStorage.setItem('local_subscribers_v7', JSON.stringify(subscribers));
-    }
-
-    function toggleTheme() {
-        const isDark = document.body.classList.toggle('dark-mode');
-        localStorage.setItem('theme_pref_v6', isDark ? 'dark' : 'light');
-        document.querySelector('.theme-toggle-btn').innerText = isDark ? "☀️ وضع النهار" : "🌙 وضع الليل";
-    }
-
-    function checkTodayRenewals() {
-        const todayDay = new Date().getDate(); 
-        const count = subscribers.filter(s => s.renewDay === todayDay).length;
-        const bar = document.getElementById('notificationBar');
-        
-        if (count > 0) {
-            document.getElementById('notificationText').innerText = `⚠️ تنبيه: لديك اليوم [${count}] مشتركين ميعاد تجديد باقتهم النهاردة!`;
-            bar.style.display = 'flex';
-        } else {
-            bar.style.display = 'none';
-        }
-    }
-
-    function filterByTodayRenewals() {
-        const todayDay = new Date().getDate();
-        document.getElementById('searchInput').value = '';
-        searchQuery = '';
-        switchTab('all');
-        const listContainer = document.getElementById('subscribersList');
-        listContainer.innerHTML = '';
-        
-        // تصفية مشتركين اليوم وترتيبهم بردو من أكبر دين لأقل دين
-        const filtered = subscribers.filter(s => s.renewDay === todayDay).sort((a, b) => {
-            return getSubscriberStatus(b).remaining - getSubscriberStatus(a).remaining;
-        });
-
-        filtered.forEach(sub => {
-            const { remaining, status, statusText } = getSubscriberStatus(sub);
-            const card = document.createElement('div');
-            card.className = `user-card ${status}`;
-            card.setAttribute('onclick', `openSubscriberModal(${sub.id})`);
-            
-            const debtTag = remaining > 0 ? `<span class="debt-outside-tag">باقي عليه: ${remaining} ج</span>` : `<span class="no-debt-outside-tag">خالص ✅</span>`;
-
-            card.innerHTML = `
-                <div class="user-info-main">
-                    <h3><span>${sub.name}</span> ${debtTag}</h3>
-                    <span class="countdown-text">📅 تجديده اليوم (يوم ${sub.renewDay})</span>
+        <!-- خانة تثبيت التطبيق السفلية -->
+        <div class="footer-install-box" id="footerInstallContainer">
+            <div class="footer-install-info">
+                <div class="footer-install-logo"></div>
+                <div>
+                    <div class="footer-install-title">تطبيق كباب صلاح الرسمي</div>
+                    <div class="footer-install-desc">تصفح المنيو واطلب أسرع من الشاشة الرئيسية</div>
                 </div>
-                <span class="status-badge">${statusText}</span>
-            `;
-            listContainer.appendChild(card);
-        });
-    }
+            </div>
+            <button class="footer-install-btn" id="footerInstallBtn">تثبيت التطبيق</button>
+        </div>
 
-    function getFormattedDateTime() {
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = now.getMonth() + 1;
-        const d = now.getDate();
-        let hours = now.getHours();
-        const mins = now.getMinutes().toString().padStart(2, '0');
-        const ampm = hours >= 12 ? 'م' : 'ص';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        return `[${d}/${m}/${y} - ${hours}:${mins} ${ampm}]`;
-    }
+        <p class="footer-rights">جميع الحقوق محفوظة لمحلات كباب صلاح © 2026</p>
+        <div class="dev-credit">
+            Designed by eng / Ahmed Gaber shehata
+            <a href="tel:01030252806">📞 01030252806</a>
+        </div>
+    </footer>
 
-    function getSubscriberStatus(sub) {
-        const totalRequired = sub.packagePrice + sub.previousDebt;
-        const remaining = totalRequired - sub.currentPaid;
-        let status = 'unpaid'; let statusText = 'لم يدفع';
-
-        if (sub.currentPaid >= totalRequired) { status = 'fully-paid'; statusText = 'كامل الدفع'; }
-        else if (sub.currentPaid > 0 && sub.currentPaid < totalRequired) { status = 'partial-paid'; statusText = 'دفع جزئي'; }
-
-        return { totalRequired, remaining, status, statusText };
-    }
-
-    function updateCounters() {
-        document.getElementById('count-all').innerText = subscribers.length;
-        document.getElementById('count-paid').innerText = subscribers.filter(s => getSubscriberStatus(s).status === 'fully-paid').length;
-        document.getElementById('count-partial').innerText = subscribers.filter(s => getSubscriberStatus(s).status === 'partial-paid').length;
-        document.getElementById('count-unpaid').innerText = subscribers.filter(s => getSubscriberStatus(s).status === 'unpaid').length;
-        calculateVaultData();
-    }
-
-    function render() {
-        const listContainer = document.getElementById('subscribersList');
-        listContainer.innerHTML = '';
-        
-        if (currentTab === 'vault') return;
-
-        let filtered = subscribers;
-        if (currentTab === 'paid') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'fully-paid');
-        if (currentTab === 'partial') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'partial-paid');
-        if (currentTab === 'unpaid') filtered = subscribers.filter(s => getSubscriberStatus(s).status === 'unpaid');
-
-        if (searchQuery.trim() !== '') filtered = filtered.filter(s => s.name.toString().includes(searchQuery.trim()));
-        if (filtered.length === 0) { listContainer.innerHTML = `<div class="no-results">لا يوجد نتائج للمطابقة.</div>`; return; }
-
-        // 🔄 سحر الترتيب: فرز المصفوفة تنازلياً من أكبر متبقي لأقل متبقي 🔄
-        filtered.sort((a, b) => {
-            return getSubscriberStatus(b).remaining - getSubscriberStatus(a).remaining;
-        });
-
-        filtered.forEach(sub => {
-            const { remaining, status, statusText } = getSubscriberStatus(sub);
-            const card = document.createElement('div');
-            card.className = `user-card ${status}`;
-            card.setAttribute('onclick', `openSubscriberModal(${sub.id})`);
+    <div class="modal" id="cartModal" onclick="if(event.target==this) toggleCart(false)">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 12px; font-size: 1rem; font-weight: 800;">طلباتك</h3>
+            <div id="cartItemsList"></div>
             
-            const debtTag = remaining > 0 ? `<span class="debt-outside-tag">باقي عليه: ${remaining} ج</span>` : `<span class="no-debt-outside-tag">خالص ✅</span>`;
-
-            card.innerHTML = `
-                <div class="user-info-main">
-                    <h3><span>${sub.name}</span> ${debtTag}</h3>
-                    <span class="countdown-text">📅 ميعاد تجديده يوم ${sub.renewDay} في الشهر</span>
+            <div style="margin: 12px 0; padding: 10px 14px; background: rgba(230, 81, 0, 0.05); border-radius: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>إجمالي الأصناف:</span>
+                    <b id="subTotalAmount">0 جنيه</b>
                 </div>
-                <span class="status-badge">${statusText}</span>
-            `;
-            listContainer.appendChild(card);
-        });
-        updateCounters();
-    }
+                <hr style="border: none; border-top: 1px dashed var(--border-color); margin: 4px 0;">
+                <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 0.95rem; color: var(--brand-orange);">
+                    <span>الإجمالي:</span>
+                    <b id="totalAmount">0 جنيه</b>
+                </div>
+            </div>
 
-    function autoRenewByDay(dayNumber) {
-        if (!checkAdminAuth()) return; 
-        if (!confirm(`هل تريد تدوير الحسابات وترحيل المتبقي تلقائياً لكل مشتركين يوم [ ${dayNumber} ]؟`)) return;
-        
-        const timestamp = getFormattedDateTime();
-        subscribers.forEach(sub => {
-            if (sub.renewDay === dayNumber) {
-                const { remaining } = getSubscriberStatus(sub);
-                sub.previousDebt = remaining; 
-                sub.currentPaid = 0;          
-                sub.history.push(`${timestamp} تدوير تلقائي للمتبقي: ${remaining} ج`);
-            }
-        });
-        
-        saveData();
-        render();
-        alert(`تم تدوير حسابات يوم ${dayNumber} بنجاح! 🚀`);
-    }
+            <div class="user-fields">
+                <div class="order-type-container">
+                    <span class="order-type-title">🛵 نوع الطلب:</span>
+                    <div class="order-type-toggle">
+                        <button type="button" class="type-btn active" id="btnDelivery" onclick="setOrderType('دليفري')">🛵 دليفري</button>
+                        <button type="button" class="type-btn" id="btnTakeaway" onclick="setOrderType('تيك أواي')">🛍️ تيك أواي</button>
+                    </div>
+                </div>
+                
+                <input type="text" id="uName" placeholder="الاسم بالكامل">
+                <input type="tel" id="uPhone" placeholder="رقم الموبايل">
+                <input type="text" id="uAddr" placeholder="العنوان بالتفصيل (الشارع / الدور / الشقة)">
+            </div>
+            <button class="submit-btn" onclick="sendToWA()">تأكيد الطلب</button>
+        </div>
+    </div>
 
-    function openSubscriberModal(id) {
-        activeSubId = id; 
-        const sub = subscribers.find(s => s.id === id); 
-        if(!sub) return;
-        
-        const { remaining } = getSubscriberStatus(sub);
-        let cleanPhone = sub.phone.toString();
+    <script>
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSdu_bKzrKDYqf5Jw_T8F9FbIDEm8y2svpN9fgpAiw7_lP_69kYuBJpgLgWmRzzr0DYHivSvk9gJ-rI/pub?output=csv';
+        const IMAGES_PATH = "./images/"; 
+        let menuData = [], cart = [];
+        let currentTotal = 0; 
+        let selectedOrderType = 'دليفري'; 
+        let deferredPrompt = null;
 
-        document.getElementById('m-name').innerText = sub.name;
-        document.getElementById('m-renew-day').innerText = `يوم ${sub.renewDay} في الشهر`;
-        document.getElementById('m-price').innerText = sub.packagePrice + " ج";
-        document.getElementById('m-debt').innerText = sub.previousDebt + " ج";
-        document.getElementById('m-paid').innerText = sub.currentPaid + " ج";
-        document.getElementById('m-remaining').innerText = remaining + " ج";
-        document.getElementById('m-remaining').style.color = remaining > 0 ? '#dc2626' : '#16a34a';
+        function updateThemeUI(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) icon.innerText = theme === 'dark' ? '☀️' : '🌙';
+        }
 
-        document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
-        document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('يا غالي حابين نذكرك إن تجديد باقتك يوم ' + sub.renewDay + ' والمتبقي عليك ' + remaining + ' ج')}`);
-        document.getElementById('m-pay-btn').setAttribute('onclick', `submitModalPayment(${id})`);
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeUI(newTheme);
+        }
 
-        const histContent = document.getElementById('m-history-content');
-        histContent.innerHTML = sub.history.map(h => `<div class="timeline-item">${h}</div>`).join('') || '<div>لا توجد عمليات مسجلة</div>';
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeUI(savedTheme);
 
-        document.getElementById('m-pay-input').value = ''; 
-        document.getElementById('m-calc-box').style.display = 'none';
-        
-        document.getElementById('detailsModal').style.display = 'flex'; 
-        document.body.classList.add('modal-open'); 
-    }
+            // تحميل المنيو أولاً لحصر الصور الأساسية قبل إخفاء الـ Splash
+            loadMenu();
 
-    function closeModal() { 
-        document.getElementById('detailsModal').style.display = 'none'; 
-        document.body.classList.remove('modal-open'); 
-    }
-    function closeModalOutside(e) { if(e.target.id === 'detailsModal') closeModal(); }
-
-    function calcModalCashFees() {
-        const input = document.getElementById('m-pay-input'); const box = document.getElementById('m-calc-box');
-        const text = document.getElementById('m-calc-text'); const val = parseFloat(input.value);
-        if(!isNaN(val) && val > 0) { box.style.display = 'flex'; const totalWithFees = Math.ceil(val + Math.max(3, val * 0.01)); text.innerText = `${totalWithFees} ج`; } else { box.style.display = 'none'; }
-    }
-
-    function submitModalPayment(id) {
-        const input = document.getElementById('m-pay-input'); 
-        const amount = parseFloat(input.value);
-        if (isNaN(amount) || amount <= 0) return;
-
-        const sub = subscribers.find(s => s.id === id);
-        if (sub) {
-            const timestamp = getFormattedDateTime();
-            sub.currentPaid += amount;
-            sub.history.push(`${timestamp} دفع: ${amount} ج`);
-            saveData();
-
-            const { remaining } = getSubscriberStatus(sub);
-            
-            if (sub.disableWA) {
-                closeModal();
-                render();
-                return;
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW Registered', reg))
+                .catch(err => console.log('SW Failed', err));
             }
 
-            const waMessage = `يا غالي، تم استلام مبلغ (${amount}) ج بنجاح بتاريخ ${timestamp.split(' - ')[0].replace('[','')}.
-• حساب باقتك الحالي: (${sub.packagePrice}) ج.
-• ديون قديمة متأخرة: (${sub.previousDebt}) ج.
-• إجمالي المدفوع هذا الشهر: (${sub.currentPaid}) ج.
-*المتبقي النهائي عليك حالياً: (${remaining}) ج.*
-شكراً لتعاملك معنا! 🌸`;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('automaticInstallBanner')?.classList.add('show-banner');
+                const footerInstall = document.getElementById('footerInstallContainer');
+                if (footerInstall) footerInstall.style.display = 'flex';
+            });
 
-            let cleanPhone = sub.phone.toString();
-            if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) {
-                cleanPhone = '0' + cleanPhone;
+            async function executeInstall() {
+                if (!deferredPrompt) return;
+                deferredPrompt.prompt(); 
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                hideInstallUI();
             }
 
-            const waUrl = `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`;
-            
-            closeModal();
-            render();
+            document.getElementById('actionInstallBtn')?.addEventListener('click', executeInstall);
+            document.getElementById('footerInstallBtn')?.addEventListener('click', executeInstall);
+            document.getElementById('actionCloseBtn')?.addEventListener('click', () => {
+                document.getElementById('automaticInstallBanner')?.classList.remove('show-banner');
+            });
 
-            window.open(waUrl, '_blank');
-        }
-    }
-
-    function openAddSubscriberModal() {
-        if (!checkAdminAuth()) return; 
-        document.getElementById('add-name').value = '';
-        document.getElementById('add-phone').value = '';
-        document.getElementById('add-renew').value = '';
-        document.getElementById('add-price').value = '';
-        document.getElementById('add-debt').value = '';
-        document.getElementById('addModal').style.display = 'flex';
-    }
-
-    function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
-    function closeAddModalOutside(e) { if(e.target.id === 'addModal') closeAddModal(); }
-
-    function submitAddSubscriber() {
-        const name = document.getElementById('add-name').value.trim();
-        const phone = document.getElementById('add-phone').value.trim();
-        const renew = parseInt(document.getElementById('add-renew').value);
-        const price = parseFloat(document.getElementById('add-price').value);
-        const debt = parseFloat(document.getElementById('add-debt').value) || 0;
-
-        if (!name || isNaN(renew) || isNaN(price)) {
-            alert("برجاء ملء البيانات الأساسية (الاسم، يوم التجديد، والباقة)!");
-            return;
-        }
-
-        const newId = subscribers.length > 0 ? Math.max(...subscribers.map(s => s.id)) + 1 : 1;
-        const timestamp = getFormattedDateTime();
-
-        subscribers.push({
-            id: newId,
-            name: name,
-            phone: phone,
-            renewDay: renew,
-            packagePrice: price,
-            previousDebt: debt,
-            currentPaid: 0,
-            history: [`${timestamp} تمت الإضافة للسيستم`],
-            disableWA: false
+            window.addEventListener('appinstalled', () => {
+                deferredPrompt = null;
+                hideInstallUI();
+            });
         });
 
-        saveData();
-        closeAddModal();
-        render();
-        alert(`تمت إضافة العميل [ ${name} ] للسيستم بنجاح! 🎉`);
-    }
-
-    function openEditModalFromDetails() {
-        if (!checkAdminAuth()) return; 
-        const sub = subscribers.find(s => s.id === activeSubId);
-        if(!sub) return;
-
-        document.getElementById('edit-name').value = sub.name;
-        document.getElementById('edit-phone').value = sub.phone;
-        document.getElementById('edit-renew').value = sub.renewDay;
-        document.getElementById('edit-price').value = sub.packagePrice;
-        document.getElementById('edit-debt').value = sub.previousDebt;
-        document.getElementById('edit-paid').value = sub.currentPaid;
-        document.getElementById('edit-disable-wa').checked = sub.disableWA || false;
-
-        document.getElementById('detailsModal').style.display = 'none'; 
-        document.getElementById('editModal').style.display = 'flex';    
-    }
-
-    function closeEditModal() { 
-        document.getElementById('editModal').style.display = 'none'; 
-        document.body.classList.remove('modal-open'); 
-    }
-    function closeEditModalOutside(e) { if(e.target.id === 'editModal') closeEditModal(); }
-
-    function submitEditSubscriber() {
-        const sub = subscribers.find(s => s.id === activeSubId);
-        if(!sub) {
-            alert("خطأ في تحديد المشترك!");
-            return;
+        function hideInstallUI() {
+            document.getElementById('automaticInstallBanner')?.classList.remove('show-banner');
+            const footerInstall = document.getElementById('footerInstallContainer');
+            if (footerInstall) footerInstall.style.display = 'none';
         }
 
-        const name = document.getElementById('edit-name').value.trim();
-        const phone = document.getElementById('edit-phone').value.trim();
-        const renew = parseInt(document.getElementById('edit-renew').value);
-        const price = parseFloat(document.getElementById('edit-price').value);
-        const debt = parseFloat(document.getElementById('edit-debt').value) || 0;
-        const paid = parseFloat(document.getElementById('edit-paid').value) || 0;
-        const disableWA = document.getElementById('edit-disable-wa').checked;
+        function setOrderType(type) {
+            selectedOrderType = type;
+            const btnDel = document.getElementById('btnDelivery');
+            const btnTak = document.getElementById('btnTakeaway');
+            const addrField = document.getElementById('uAddr');
 
-        if (!name || isNaN(renew) || isNaN(price)) {
-            alert("الاسم، يوم التجديد، والباقة بيانات إلزامية!");
-            return;
+            if (type === 'دليفري') {
+                btnDel.classList.add('active'); btnTak.classList.remove('active');
+                if (addrField) addrField.style.display = 'block';
+            } else {
+                btnTak.classList.add('active'); btnDel.classList.remove('active');
+                if (addrField) addrField.style.display = 'none';
+            }
+            updateCart();
         }
 
-        const timestamp = getFormattedDateTime();
-        sub.name = name;
-        sub.phone = phone;
-        sub.renewDay = renew;
-        sub.packagePrice = price;
-        sub.previousDebt = debt;
-        sub.currentPaid = paid;
-        sub.disableWA = disableWA;
-        sub.history.push(`${timestamp} تعديل البيانات والخيارات يدوياً`);
-
-        saveData();
-        closeEditModal();
-        render();
-        alert("تم حفظ التعديلات بنجاح! ✏️");
-    }
-
-    function deleteActiveSubscriber() {
-        if (!checkAdminAuth()) return; 
-        const sub = subscribers.find(s => s.id === activeSubId);
-        if(!sub) return;
-
-        if (confirm(`🚨 هل أنت متأكد من مسح العميل [ ${sub.name} ] نهائياً من السيستم؟ لا يمكن استرجاعه!`)) {
-            subscribers = subscribers.filter(s => s.id !== activeSubId);
-            saveData();
-            closeModal();
-            render();
-            alert("تم حذف العميل من السيستم بنجاح.");
+        function parseCSVLine(text) {
+            const result = []; let insideQuote = false; let entry = "";
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                if (char === '"') { insideQuote = !insideQuote; } 
+                else if (char === ',' && !insideQuote) { result.push(entry.trim()); entry = ""; } 
+                else { entry += char; }
+            }
+            result.push(entry.trim()); return result;
         }
-    }
 
-    // 📥 تحميل نسخة احتياطية من البيانات على جهازك
-    function downloadBackup() {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(subscribers));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `نسخة_احتياطية_المشتركين_${new Date().toISOString().slice(0,10)}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-    }
+        function cleanPriceValue(rawPrice) {
+            if (!rawPrice) return 0;
+            const cleanStr = rawPrice.split('.')[0].replace(/[^\d]/g, '');
+            return parseInt(cleanStr, 10) || 0;
+        }
 
-    function triggerUploadBackup() {
-        if (!checkAdminAuth()) return; 
-        document.getElementById('backupFile').click();
-    }
+        function updateProgressUI(percentage) {
+            const counterEl = document.getElementById('loadCounter');
+            const progressEl = document.getElementById('loadProgress');
+            if (counterEl) counterEl.innerText = `${percentage}%`;
+            if (progressEl) progressEl.style.width = `${percentage}%`;
+        }
 
-    // 📤 رفع نسخة احتياطية للسيستم
-    function uploadBackup(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+        // دالة الـ Preload للصور الأساسية مع تحديث حقيقي للعداد المئوي
+        function preloadCriticalImages(imageUrls, callback) {
+            if (imageUrls.length === 0) { updateProgressUI(100); callback(); return; }
+            let loadedCount = 0; 
+            const totalImages = imageUrls.length;
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
+            imageUrls.forEach(url => {
+                const img = new Image();
+                img.src = url;
+                
+                const onImageEvent = () => {
+                    loadedCount++;
+                    // حساب النسبة الحقيقية بناءً على الصور المحملة فعلياً
+                    const percentage = Math.floor((loadedCount / totalImages) * 100);
+                    updateProgressUI(percentage);
+                    
+                    if (loadedCount === totalImages) {
+                        setTimeout(callback, 400); // إعطاء مهلة بسيطة لراحة العين
+                    }
+                };
+
+                img.onload = onImageEvent;
+                img.onerror = onImageEvent; // في حال كانت الصورة معطوبة لا يعلق العداد
+            });
+        }
+
+        async function loadMenu() {
+            const timestamp = Date.now();
+            updateProgressUI(5); 
             try {
-                const parsed = JSON.parse(e.target.result);
-                if (Array.isArray(parsed)) {
-                    subscribers = parsed;
-                    saveData();
-                    render();
-                    alert("📊 تم استعادة وتحميل النسخة الاحتياطية بنجاح 100%!");
+                const res = await fetch(`${csvUrl}&t=${timestamp}`, { cache: "no-store" });
+                if (!res.ok) throw new Error();
+                const data = await res.text();
+                const rows = data.split(/\r?\n/).slice(1);
+                
+                menuData = rows.map((row, idx) => {
+                    if(!row.trim()) return null;
+                    const col = parseCSVLine(row); 
+                    const category = col[0];
+                    const name = col[1];
+                    if(!name || name === "اسم الصنف") return null;
+                    
+                    const mainPrice = col[3] || ""; 
+                    const extraPrice = col[4] || ""; 
+
+                    let prices = {};
+                    if (mainPrice && mainPrice.trim() !== "" && mainPrice !== "0") {
+                        if (category === "السندوتشات" && (name.includes("كفتة") || name.includes("طرب") || name.includes("حواوشي") || name.includes("الحواوشي")) && extraPrice && extraPrice.trim() !== "") {
+                            prices["وسط M"] = mainPrice;
+                            prices["كبير L"] = extraPrice;
+                        } else {
+                            prices["طلب"] = mainPrice;
+                        }
+                    }
+
+                    return { 
+                        id: idx, 
+                        category: category || "أخرى", 
+                        name: name, 
+                        desc: col[2] || "",  
+                        prices: prices
+                    };
+                }).filter(Boolean);
+
+                if(menuData.length > 0) {
+                    // حصر التصنيفات الفريدة
+                    const categories = [...new Set(menuData.map(item => item.category))];
+                    const defaultCategory = categories[0]; // أول قسم هيفتح تلقائياً
+
+                    // تجهيز قائمة الصور الحرجة (اللوجو + صور كل الأقسام + صور أصناف القسم الأول فقط)
+                    const criticalImages = ['./images/logooo.png'];
+                    
+                    // 1. إضافة صور شريط الأقسام العلوي
+                    categories.forEach(cat => criticalImages.push(`${IMAGES_PATH}${cat}.jpg`));
+                    
+                    // 2. إضافة صور أصناف أول قسم فقط ليراها العميل كاش فوراً
+                    menuData.forEach(item => {
+                        if (item.category === defaultCategory) {
+                            criticalImages.push(`${IMAGES_PATH}${item.name}.jpg`);
+                        }
+                    });
+
+                    // تشغيل التحميل المسبق للصور الحرجة وربطه بالعداد الحقيقي
+                    preloadCriticalImages(criticalImages, () => {
+                        renderNav();
+                        const splash = document.getElementById('splash-screen');
+                        if(splash) splash.classList.add('splash-hidden');
+                    });
+
                 } else {
-                    alert("الملف غير صالح أو تالف!");
+                    document.getElementById('menuList').innerHTML = '<p style="text-align:center; padding:20px;">عذراً، لا توجد بيانات متاحة حالياً.</p>';
+                    document.getElementById('splash-screen')?.classList.add('splash-hidden');
                 }
-            } catch (err) {
-                alert("خطأ في قراءة ملف النسخة الاحتياطية!");
+            } catch (e) {
+                updateProgressUI(100);
+                document.getElementById('splash-screen')?.classList.add('splash-hidden');
             }
-        };
-        reader.readAsText(file);
-        event.target.value = ''; 
-    }
-
-    function checkAdminAuth() {
-        const pin = prompt("🔐 برجاء إدخال رمز الإدارة السري للمتابعة:");
-        if (pin === ADMIN_PIN) return true;
-        alert("❌ رمز حماية خاطئ!");
-        return false;
-    }
-
-    function unlockVault() {
-        const pin = document.getElementById('vaultPassword').value;
-        if(pin === "1234") { isVaultUnlocked = true; document.getElementById('vaultAuthBox').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; calculateVaultData(); } else { alert("رمز خاطئ!"); }
-    }
-
-    function calculateVaultData() {
-        let totalCash = 0; let totalOldDebts = 0; let totalCurrentDebt = 0;
-        subscribers.forEach(sub => {
-            totalCash += sub.currentPaid;
-            totalOldDebts += sub.previousDebt;
-            const currentLeft = sub.packagePrice - sub.currentPaid;
-            if(currentLeft > 0) totalCurrentDebt += currentLeft;
-        });
-
-        if(isVaultUnlocked && showNumbers) {
-            document.getElementById('v-cash').innerText = totalCash + " ج";
-            document.getElementById('v-old-debts').innerText = totalOldDebts + " ج";
-            document.getElementById('v-current-debt').innerText = totalCurrentDebt + " ج";
         }
-    }
 
-    function toggleNumbersVisibility() {
-        showNumbers = !showNumbers;
-        if(showNumbers) { calculateVaultData(); } 
-        else { document.getElementById('v-cash').innerText = "****"; document.getElementById('v-old-debts').innerText = "****"; document.getElementById('v-current-debt').innerText = "****"; }
-    }
+        function renderNav() {
+            const categories = [...new Set(menuData.map(item => item.category))];
+            const activeDOM = document.querySelector('.cat-item.active span');
+            let currentActiveCat = activeDOM ? activeDOM.innerText : categories[0];
+            if(!categories.includes(currentActiveCat)) currentActiveCat = categories[0];
 
-    // تبديل التبويبات
-    function switchTab(tabName) {
-        currentTab = tabName;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`tab-${tabName}`).classList.add('active');
-
-        if(tabName === 'vault') {
-            document.getElementById('list-section').classList.remove('active');
-            document.getElementById('vault-section').classList.add('active');
-            calculateVaultData();
-        } else {
-            document.getElementById('vault-section').classList.remove('active');
-            document.getElementById('list-section').classList.add('active');
-            render();
+            document.getElementById('catNav').innerHTML = categories.map((catName) => `
+                <div class="cat-item ${currentActiveCat === catName ? 'active' : ''}" onclick="filterCat('${catName}', this)">
+                    <div class="cat-img-box"><img src="${IMAGES_PATH}${catName}.jpg" onerror="this.onerror=null; this.src='${IMAGES_PATH}default.jpg';"></div>
+                    <span>${catName}</span>
+                </div>
+            `).join('');
+            filterCat(currentActiveCat);
         }
-    }
 
-    function handleSearch() { searchQuery = document.getElementById('searchInput').value; render(); }
+        function filterCat(cat, el) {
+            if(el) { document.querySelectorAll('.cat-item').forEach(b => b.classList.remove('active')); el.classList.add('active'); }
+            const filtered = menuData.filter(i => i.category === cat);
+            
+            const isLargeCategory = (cat === "المشويات" || cat === "الوجبات" || cat === "الصواني");
 
-    initData();
-</script>
+            document.getElementById('menuList').innerHTML = filtered.map(item => {
+                let sizeButtons = ""; let firstSelectedSize = ""; let firstSelectedPrice = "";
+                
+                for (let [sizeName, priceVal] of Object.entries(item.prices)) {
+                    if(priceVal && typeof priceVal === 'string' && priceVal.trim() !== "" && priceVal !== "0") {
+                        const cleanPrice = cleanPriceValue(priceVal);
+                        if(cleanPrice > 0) {
+                            if(!firstSelectedSize) { firstSelectedSize = sizeName; firstSelectedPrice = cleanPrice; }
+                            sizeButtons += `<span class="size-option ${firstSelectedSize === sizeName ? 'selected' : ''}" onclick="selectItemSize(this, ${item.id}, '${sizeName}', ${cleanPrice})">${sizeName}</span>`;
+                        }
+                    }
+                }
+                if(!firstSelectedPrice) firstSelectedPrice = "0";
+
+                let ingredientsElement = "";
+                if(item.desc && item.desc.trim() !== "") {
+                    ingredientsElement = `<span class="food-ingredients">${item.desc.trim()}</span>`;
+                }
+
+                const showSizeSelector = Object.keys(item.prices).length > 1;
+
+                if (isLargeCategory) {
+                    let ingredientsLargeElement = "";
+                    if(item.desc && item.desc.trim() !== "") {
+                        ingredientsLargeElement = `<span class="food-ingredients-large">${item.desc.trim()}</span>`;
+                    }
+
+                    return `
+                    <div class="food-card-large" id="card-${item.id}">
+                        <div class="card-large-image-wrapper">
+                            <img class="item-img-large" src="${IMAGES_PATH}${item.name}.jpg" onerror="this.onerror=null; this.src='${IMAGES_PATH}default.jpg';">
+                        </div>
+                        <div class="card-large-details">
+                            <span class="food-name-large">${item.name}</span>
+                            ${ingredientsLargeElement}
+                            ${showSizeSelector ? `<div class="size-selector" style="margin-top: 4px;">${sizeButtons}</div>` : ''}
+                            
+                            <div class="card-large-footer">
+                                <div class="price-container-leftish">
+                                    <span class="food-price" id="price-display-${item.id}">
+                                        <span class="price-num">${firstSelectedPrice}</span>
+                                        <span class="price-txt">ج.م</span>
+                                    </span>
+                                </div>
+                                <div class="btn-wrapper">
+                                    <button class="add-btn" id="btn-${item.id}" data-size="${firstSelectedSize}" data-price="${firstSelectedPrice}" onclick="triggerAddToCart(event, this, '${item.name.replace(/'/g, "\\'")}', ${item.id})">
+                                        اطلب
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                } 
+                
+                else {
+                    return `
+                    <div class="food-card" id="card-${item.id}">
+                        <div class="card-top-content">
+                            <div class="card-image-wrapper">
+                                <img class="item-img" src="${IMAGES_PATH}${item.name}.jpg" onerror="this.onerror=null; this.src='${IMAGES_PATH}default.jpg';">
+                            </div>
+                            <div class="card-details-wrapper">
+                                <span class="food-name" title="${item.name}">${item.name}</span>
+                                ${ingredientsElement}
+                                ${showSizeSelector ? `<div class="size-selector">${sizeButtons}</div>` : ''}
+                            </div>
+                        </div>
+                        <div class="card-bottom-content">
+                            <div class="btn-wrapper">
+                                <button class="add-btn" id="btn-${item.id}" data-size="${firstSelectedSize}" data-price="${firstSelectedPrice}" onclick="triggerAddToCart(event, this, '${item.name.replace(/'/g, "\\'")}', ${item.id})">
+                                    اطلب
+                                </button>
+                            </div>
+                            <div class="price-container-leftish">
+                                <span class="food-price" id="price-display-${item.id}">
+                                    <span class="price-num">${firstSelectedPrice}</span>
+                                    <span class="price-txt">ج.م</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>`;
+                }
+            }).join('');
+        }
+
+        function selectItemSize(el, itemId, sizeName, price) {
+            const card = document.getElementById(`card-${itemId}`); if(!card) return;
+            card.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('selected')); el.classList.add('selected');
+            document.getElementById(`price-display-${itemId}`).innerHTML = `<span class="price-num">${price}</span><span class="price-txt">ج.م</span>`;
+            const btn = document.getElementById(`btn-${itemId}`); btn.setAttribute('data-size', sizeName); btn.setAttribute('data-price', price);
+        }
+
+        function triggerAddToCart(e, btn, name, itemId) {
+            const size = btn.getAttribute('data-size') || "طلب"; const price = btn.getAttribute('data-price') || "0"; const img = `${IMAGES_PATH}${name}.jpg`;
+            cart.push({name, price, size, img}); 
+            
+            btn.classList.add('success-state'); 
+            btn.innerText = "✓ تم الطلب";
+
+            setTimeout(() => { 
+                btn.classList.remove('success-state'); 
+                btn.innerText = "اطلب"; 
+            }, 1500);
+
+            const fly = document.createElement('div'); fly.className = 'fly-item'; fly.innerHTML = '🥩';
+            fly.style.left = e.clientX + 'px'; fly.style.top = e.clientY + 'px'; document.body.appendChild(fly);
+            const cartBtn = document.getElementById('cartBtn');
+            if(cartBtn) {
+                const cartPos = cartBtn.getBoundingClientRect();
+                setTimeout(() => { fly.style.left = (cartPos.left + 15) + 'px'; fly.style.top = (cartPos.top + 15) + 'px'; fly.style.transform = 'scale(0.1)'; fly.style.opacity = '0'; }, 20);
+            }
+            setTimeout(() => { fly.remove(); updateCart(); if(cartBtn) { cartBtn.classList.add('shake'); setTimeout(() => cartBtn.classList.remove('shake'), 500); } }, 600);
+        }
+
+        function updateCart() {
+            const badge = document.getElementById('cartBadge'); if(badge) { badge.innerText = cart.length; badge.classList.toggle('show', cart.length > 0); }
+            let subtotal = 0; const container = document.getElementById('cartItemsList');
+            container.innerHTML = cart.map((item, idx) => {
+                subtotal += parseInt(item.price, 10) || 0;
+                return `<div class="cart-item-card"><img src="${item.img}" class="cart-item-img" onerror="this.onerror=null; this.src='${IMAGES_PATH}default.jpg';"><div class="cart-item-info"><span class="cart-item-name">${item.name}</span><span class="cart-item-size">${item.size !== 'طلب' ? `الحجم: ${item.size}` : 'الحجم: افتراضي'}</span><span class="cart-item-price">${item.price} ج.م</span></div><span class="remove-btn" onclick="removeFromCart(${idx})">حذف</span></div>`;
+            }).join('');
+            
+            currentTotal = subtotal;
+            document.getElementById('subTotalAmount').innerText = `${subtotal} ج.م`;
+            document.getElementById('totalAmount').innerText = `${currentTotal} ج.م`;
+        }
+
+        function removeFromCart(idx) { cart.splice(idx, 1); updateCart(); if(cart.length === 0) toggleCart(false); }
+        function toggleCart(s) { const modal = document.getElementById('cartModal'); if(!modal) return; if (s) { modal.style.display = 'flex'; history.pushState({ cartOpen: open }, ""); } else { modal.style.display = 'none'; } }
+        window.addEventListener('popstate', function () { const modal = document.getElementById('cartModal'); if (modal && modal.style.display === 'flex') { modal.style.display = 'none'; } });
+
+        function sendToWA() {
+            const n = document.getElementById('uName').value.trim(), p = document.getElementById('uPhone').value.trim(), a = document.getElementById('uAddr').value.trim();
+            if(!n || !p || cart.length === 0) { alert("برجاء إدخال اسمك ورقم تليفونك أولاً لتأكيد طلبك."); return; }
+            if (selectedOrderType === "دليفري" && !a) { alert("برجاء كتابة عنوانك بالتفصيل."); return; }
+
+            let msg = `*طلب جديد - كباب صلاح*\n──────────────\n👤 *الاسم:* ${n}\n📱 *الموبايل:* ${p}\n🛵 *نوع الطلب:* ${selectedOrderType}\n`;
+            if (selectedOrderType === "دليفري") msg += `📍 *العنوان بالتفصيل:* ${a}\n`;
+            msg += `──────────────\n📦 *الطلبات:*\n`;
+            const summary = {}; 
+            cart.forEach(item => { const key = `${item.name} ${item.size !== 'طلب' ? `(${item.size})` : ''}`; summary[key] = (summary[key] || 0) + 1; });
+            for (const [itemKey, qty] of Object.entries(summary)) msg += `• ${itemKey} × ${qty}\n`;
+            msg += `──────────────\n`;
+            msg += `💰 *الإجمالي النهائي:* ${currentTotal} جنيه\n_شكراً لاختياركم كباب صلاح_ ✨`;
+            window.open(`https://wa.me/201111173444?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+    </script>
 </body>
 </html>
