@@ -1,4 +1,4 @@
-const CACHE_NAME = 'subscribers-v13';
+const CACHE_NAME = 'subscribers-v14';
 const ASSETS = [
   'index.html',
   'manifest.json'

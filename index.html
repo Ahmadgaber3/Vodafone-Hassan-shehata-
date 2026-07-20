@@ -143,7 +143,6 @@
         .admin-add-btn { flex: 2; background: #16a34a; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 140px; }
         .backup-btn { flex: 1; background: #475569; color: white; border: none; padding: 10px; border-radius: var(--radius); font-size: 11px; font-weight: bold; cursor: pointer; }
         
-        /* 📲 ستايل المساعد العلوي الآمن */
         .helper-reminder-bar { background: linear-gradient(135deg, #db2777, #9d174d); color: white; padding: 12px; border-radius: var(--radius); margin-bottom: 10px; display: none; flex-direction: column; gap: 8px; box-shadow: 0 4px 14px rgba(219,39,119,0.3); }
         .helper-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 13px; }
         .helper-body { display: flex; gap: 6px; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.15); padding: 8px; border-radius: 8px; }
@@ -168,7 +167,6 @@
             <button class="pwa-btn" id="pwaInstallBtn">📲 تثبيت</button>
         </div>
 
-        <!-- 📲 شريط المساعد الذكي الآمن -->
         <div class="helper-reminder-bar" id="helperReminderBar">
             <div class="helper-header">
                 <span>📢 مساعد التذكير المالي السريع</span>
@@ -219,6 +217,7 @@
             <div id="subscribersList" class="subscribers-list"></div>
         </div>
 
+        <!-- 🔒 قسم الخزنة الجديد بالثلاث خانات فقط بالترتيب المطلوب -->
         <div id="vault-section" class="section-content">
             <div class="vault-view">
                 <div class="vault-auth" id="vaultAuthBox">
@@ -694,12 +693,23 @@
         if(document.getElementById('vaultPassword').value === "1234") { isVaultUnlocked = true; document.getElementById('vaultAuthBox').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; calculateVaultData(); }
     }
 
+    // 🔄 الحساب الرياضي الدقيق للثلاث خانات فقط
     function calculateVaultData() {
-        let totalRequired = 0; let totalRemaining = 0; let totalPaid = 0;
+        let totalRequired = 0; 
+        let totalRemaining = 0; 
+        let totalPaid = 0;
+
         subscribers.forEach(sub => {
-            totalRequired += (sub.packagePrice + sub.previousDebt); totalPaid += sub.currentPaid;
+            // 1. الإجمالي لكل مشترك (باقته + ديونه)
+            totalRequired += (sub.packagePrice + sub.previousDebt);
+            
+            // 2. إجمالي المتبقي الفعلي
             totalRemaining += getSubscriberStatus(sub).remaining;
+
+            // 3. إجمالي المدفوع الفعلي
+            totalPaid += sub.currentPaid;
         });
+
         if(isVaultUnlocked && showNumbers) {
             document.getElementById('v-total-required').innerText = totalRequired + " ج";
             document.getElementById('v-total-remaining').innerText = totalRemaining + " ج";
@@ -708,8 +718,13 @@
     }
 
     function toggleNumbersVisibility() {
-        showNumbers = !showNumbers; if(showNumbers) calculateVaultData();
-        else { document.getElementById('v-total-required').innerText = "****"; document.getElementById('v-total-remaining').innerText = "****"; document.getElementById('v-total-paid').innerText = "****"; }
+        showNumbers = !showNumbers; 
+        if(showNumbers) calculateVaultData();
+        else { 
+            document.getElementById('v-total-required').innerText = "****"; 
+            document.getElementById('v-total-remaining').innerText = "****"; 
+            document.getElementById('v-total-paid').innerText = "****"; 
+        }
     }
 
     function switchTab(tabName) {
