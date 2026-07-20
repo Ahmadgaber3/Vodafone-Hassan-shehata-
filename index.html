@@ -505,7 +505,7 @@
         updateHelperUI();
     }
 
-    /* ✏️ نص الرسالة المحدث للمساعد السريع */
+    /* ✏️ الرسالة المختصرة تماماً للمساعد السريع */
     function updateHelperUI() {
         if (helperIndex >= helperDebtors.length) {
             document.getElementById('helperReminderBar').style.display = 'none';
@@ -516,8 +516,8 @@
         const { remaining } = getSubscriberStatus(sub);
         document.getElementById('helperText').innerHTML = `🔄 عميل [${helperIndex + 1}/${helperDebtors.length}]: <b>${sub.name}</b> (${remaining} ج)`;
         
-        // النص المعدل حسب الطلب
-        const waMessage = `أهلاً بك يا ${sub.name} 🌸\n• تم دفع: (${sub.currentPaid}) ج\n• حساب قديم: (${sub.previousDebt}) ج\n• المتبقي النهائي: (${remaining}) ج\nشكراً لتعاملك معنا!`;
+        // النص المطلوبة بالظبط: تم دفع الان و المتبقي فقط
+        const waMessage = `• تم دفع الان: (${sub.currentPaid}) ج\n• المتبقي: (${remaining}) ج`;
         
         let cleanPhone = sub.phone.toString();
         if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) cleanPhone = '0' + cleanPhone;
@@ -584,7 +584,7 @@
         saveData(); render();
     }
 
-    /* ✏️ نص الرسالة المحدث عند فتح كارت العميل مباشرة */
+    /* ✏️ الرسالة المختصرة تماماً عند الضغط اليدوي على الواتساب */
     function openSubscriberModal(id) {
         activeSubId = id; const sub = subscribers.find(s => s.id === id); if(!sub) return;
         const { remaining } = getSubscriberStatus(sub); let cleanPhone = sub.phone.toString();
@@ -596,8 +596,8 @@
         document.getElementById('m-remaining').innerText = remaining + " ج";
         document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
         
-        // النص المعدل المباشر للزرار اليدوي
-        const customWaMessage = `أهلاً بك يا ${sub.name} 🌸\n• تم دفع: (${sub.currentPaid}) ج\n• حساب قديم: (${sub.previousDebt}) ج\n• المتبقي النهائي: (${remaining}) ج\nشكراً لتعاملك معنا!`;
+        // النص المطلوبة بالظبط
+        const customWaMessage = `• تم دفع الان: (${sub.currentPaid}) ج\n• المتبقي: (${remaining}) ج`;
         document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(customWaMessage)}`);
         
         document.getElementById('m-pay-btn').setAttribute('onclick', `submitModalPayment(${id})`);
@@ -613,7 +613,7 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; text.innerText = `${Math.ceil(val + Math.max(3, val * 0.01))} ج`; } else { box.style.display = 'none'; }
     }
 
-    /* ✏️ نص الرسالة المحدث عند إدخال سداد جديد للعميل */
+    /* ✏️ الرسالة المختصرة تماماً عند السداد الفوري */
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
@@ -628,8 +628,8 @@
                 return;
             }
 
-            // النص المعدل عند تحصيل دفعة جديدة
-            const waMessage = `أهلاً بك يا ${sub.name} 🌸\n• تم دفع: (${amount}) ج\n• حساب قديم: (${sub.previousDebt}) ج\n• إجمالي المدفوع حتى الآن: (${sub.currentPaid}) ج\n• المتبقي النهائي: (${remaining}) ج\nشكراً لتعاملك معنا!`;
+            // النص المطلوبة بالظبط: تم دفع الان والمتبقي فقط
+            const waMessage = `• تم دفع الان: (${amount}) ج\n• المتبقي: (${remaining}) ج`;
 
             let cleanPhone = sub.phone.toString();
             if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) cleanPhone = '0' + cleanPhone;
