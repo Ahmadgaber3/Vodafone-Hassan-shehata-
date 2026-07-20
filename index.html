@@ -120,7 +120,6 @@
         .payment-input { flex: 1; padding: 6px 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); border-radius: 8px; outline: none; font-size: 11px; }
         .submit-pay-btn { background: #2563eb; color: white; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px; }
 
-        .cash-calc-box { background: #fff7ed; padding: 6px; border-radius: 8px; border: 1px solid #ffedd5; display: flex; justify-content: space-between; align-items: center; color: #7c2d12; font-size: 10px; margin-bottom: 8px; }
         .history-box { background: var(--bg); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; max-height: 80px; overflow-y: auto; }
         .history-title { font-weight: 700; color: var(--text-sub); margin-bottom: 4px; }
         .timeline-item { position: relative; padding-right: 12px; margin-bottom: 4px; color: var(--text-main); font-size: 10px; }
@@ -266,13 +265,8 @@
         </div>
 
         <div class="payment-action">
-            <input type="number" class="payment-input" id="m-pay-input" placeholder="ادخل المبلغ للخصم فوري..." oninput="calcModalCashFees()">
+            <input type="number" class="payment-input" id="m-pay-input" placeholder="ادخل المبلغ الصافي لتنزيله فوري...">
             <button class="submit-pay-btn" id="m-pay-btn">دفع الآن</button>
-        </div>
-
-        <div class="cash-calc-box" id="m-calc-box" style="display:none;">
-            <span>فودافون كاش شامل الرسوم (+1%):</span>
-            <strong id="m-calc-text">0 ج</strong>
         </div>
 
         <div class="history-box">
@@ -505,7 +499,7 @@
         updateHelperUI();
     }
 
-    /* ✏️ الرسالة المختصرة تماماً للمساعد السريع */
+    /* ✏️ رسالة التذكير السريع: "بنفكرك ان عليك [المبلغ] ج" فقط */
     function updateHelperUI() {
         if (helperIndex >= helperDebtors.length) {
             document.getElementById('helperReminderBar').style.display = 'none';
@@ -516,8 +510,8 @@
         const { remaining } = getSubscriberStatus(sub);
         document.getElementById('helperText').innerHTML = `🔄 عميل [${helperIndex + 1}/${helperDebtors.length}]: <b>${sub.name}</b> (${remaining} ج)`;
         
-        // النص المطلوبة بالظبط: تم دفع الان و المتبقي فقط
-        const waMessage = `• تم دفع الان: (${sub.currentPaid}) ج\n• المتبقي: (${remaining}) ج`;
+        // النص المطلوب تماماً وبدون أسماء
+        const waMessage = `بنفكرك ان عليك (${remaining}) ج`;
         
         let cleanPhone = sub.phone.toString();
         if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) cleanPhone = '0' + cleanPhone;
@@ -584,7 +578,7 @@
         saveData(); render();
     }
 
-    /* ✏️ الرسالة المختصرة تماماً عند الضغط اليدوي على الواتساب */
+    /* ✏️ زر التذكير اليدوي: "بنفكرك ان عليك [المبلغ] ج" فقط */
     function openSubscriberModal(id) {
         activeSubId = id; const sub = subscribers.find(s => s.id === id); if(!sub) return;
         const { remaining } = getSubscriberStatus(sub); let cleanPhone = sub.phone.toString();
@@ -596,8 +590,8 @@
         document.getElementById('m-remaining').innerText = remaining + " ج";
         document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
         
-        // النص المطلوبة بالظبط
-        const customWaMessage = `• تم دفع الان: (${sub.currentPaid}) ج\n• المتبقي: (${remaining}) ج`;
+        // النص المطلوبة للزر اليدوي
+        const customWaMessage = `بنفكرك ان عليك (${remaining}) ج`;
         document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(customWaMessage)}`);
         
         document.getElementById('m-pay-btn').setAttribute('onclick', `submitModalPayment(${id})`);
@@ -607,13 +601,8 @@
 
     function closeModal() { document.getElementById('detailsModal').style.display = 'none'; document.body.classList.remove('modal-open'); }
     function closeModalOutside(e) { if(e.target.id === 'detailsModal') closeModal(); }
-    function calcModalCashFees() {
-        const input = document.getElementById('m-pay-input'); const box = document.getElementById('m-calc-box');
-        const text = document.getElementById('m-calc-text'); const val = parseFloat(input.value);
-        if(!isNaN(val) && val > 0) { box.style.display = 'flex'; text.innerText = `${Math.ceil(val + Math.max(3, val * 0.01))} ج`; } else { box.style.display = 'none'; }
-    }
 
-    /* ✏️ الرسالة المختصرة تماماً عند السداد الفوري */
+    /* ✏️ عند الدفع الفوري الصافي بدون رسوم أو زيادات */
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
@@ -628,7 +617,7 @@
                 return;
             }
 
-            // النص المطلوبة بالظبط: تم دفع الان والمتبقي فقط
+            // النص المفصل فقط عند تأكيد استلام دفعة جديدة
             const waMessage = `• تم دفع الان: (${amount}) ج\n• المتبقي: (${remaining}) ج`;
 
             let cleanPhone = sub.phone.toString();
