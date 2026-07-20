@@ -163,7 +163,7 @@
         </header>
 
         <div class="pwa-install-bar" id="pwaInstallBar">
-            <span>✨ ثبت التطبيق على شاشتك الرئيسية الآن:</span>
+            <span>✨ تثبيت التطبيق على الشاشة الرئيسية:</span>
             <button class="pwa-btn" id="pwaInstallBtn">📲 تثبيت</button>
         </div>
 
@@ -217,7 +217,6 @@
             <div id="subscribersList" class="subscribers-list"></div>
         </div>
 
-        <!-- 🔒 قسم الخزنة الجديد بالثلاث خانات فقط بالترتيب المطلوب -->
         <div id="vault-section" class="section-content">
             <div class="vault-view">
                 <div class="vault-auth" id="vaultAuthBox">
@@ -506,6 +505,7 @@
         updateHelperUI();
     }
 
+    /* ✏️ نص الرسالة المحدث للمساعد السريع */
     function updateHelperUI() {
         if (helperIndex >= helperDebtors.length) {
             document.getElementById('helperReminderBar').style.display = 'none';
@@ -515,7 +515,10 @@
         const sub = helperDebtors[helperIndex];
         const { remaining } = getSubscriberStatus(sub);
         document.getElementById('helperText').innerHTML = `🔄 عميل [${helperIndex + 1}/${helperDebtors.length}]: <b>${sub.name}</b> (${remaining} ج)`;
-        const waMessage = `يا غالي حابين نذكرك بتفاصيل اشتراكك والمتبقي عليك حالياً:\n• حساب باقتك: (${sub.packagePrice}) ج.\n• متأخرات قديمة: (${sub.previousDebt}) ج.\n• إجمالي المدفوع: (${sub.currentPaid}) ج.\n*المتبقي النهائي المطلوب سداده: (${remaining}) ج.*\nبرجاء السداد لضمان استمرار الخدمة! 🌸`;
+        
+        // النص المعدل حسب الطلب
+        const waMessage = `أهلاً بك يا ${sub.name} 🌸\n• تم دفع: (${sub.currentPaid}) ج\n• حساب قديم: (${sub.previousDebt}) ج\n• المتبقي النهائي: (${remaining}) ج\nشكراً لتعاملك معنا!`;
+        
         let cleanPhone = sub.phone.toString();
         if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) cleanPhone = '0' + cleanPhone;
         document.getElementById('helperGoLink').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`);
@@ -581,6 +584,7 @@
         saveData(); render();
     }
 
+    /* ✏️ نص الرسالة المحدث عند فتح كارت العميل مباشرة */
     function openSubscriberModal(id) {
         activeSubId = id; const sub = subscribers.find(s => s.id === id); if(!sub) return;
         const { remaining } = getSubscriberStatus(sub); let cleanPhone = sub.phone.toString();
@@ -591,7 +595,11 @@
         document.getElementById('m-paid').innerText = sub.currentPaid + " ج";
         document.getElementById('m-remaining').innerText = remaining + " ج";
         document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
-        document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('متبقي عليك ' + remaining + ' ج')}`);
+        
+        // النص المعدل المباشر للزرار اليدوي
+        const customWaMessage = `أهلاً بك يا ${sub.name} 🌸\n• تم دفع: (${sub.currentPaid}) ج\n• حساب قديم: (${sub.previousDebt}) ج\n• المتبقي النهائي: (${remaining}) ج\nشكراً لتعاملك معنا!`;
+        document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(customWaMessage)}`);
+        
         document.getElementById('m-pay-btn').setAttribute('onclick', `submitModalPayment(${id})`);
         document.getElementById('m-history-content').innerHTML = sub.history.map(h => `<div class="timeline-item">${h}</div>`).join('') || '<div>لا توجد عمليات</div>';
         document.getElementById('detailsModal').style.display = 'flex'; document.body.classList.add('modal-open'); 
@@ -605,12 +613,30 @@
         if(!isNaN(val) && val > 0) { box.style.display = 'flex'; text.innerText = `${Math.ceil(val + Math.max(3, val * 0.01))} ج`; } else { box.style.display = 'none'; }
     }
 
+    /* ✏️ نص الرسالة المحدث عند إدخال سداد جديد للعميل */
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
         const sub = subscribers.find(s => s.id === id);
         if (sub) {
-            sub.currentPaid += amount; sub.history.push(`دفع: ${amount} ج`); saveData(); closeModal(); render();
+            sub.currentPaid += amount; sub.history.push(`دفع: ${amount} ج`); saveData(); 
+            const { remaining } = getSubscriberStatus(sub);
+
+            if (sub.disableWA) {
+                closeModal();
+                render();
+                return;
+            }
+
+            // النص المعدل عند تحصيل دفعة جديدة
+            const waMessage = `أهلاً بك يا ${sub.name} 🌸\n• تم دفع: (${amount}) ج\n• حساب قديم: (${sub.previousDebt}) ج\n• إجمالي المدفوع حتى الآن: (${sub.currentPaid}) ج\n• المتبقي النهائي: (${remaining}) ج\nشكراً لتعاملك معنا!`;
+
+            let cleanPhone = sub.phone.toString();
+            if (!cleanPhone.startsWith('0') && cleanPhone.length > 0) cleanPhone = '0' + cleanPhone;
+
+            closeModal();
+            render();
+            window.open(`https://wa.me/2${cleanPhone}?text=${encodeURIComponent(waMessage)}`, '_blank');
         }
     }
 
@@ -693,20 +719,14 @@
         if(document.getElementById('vaultPassword').value === "1234") { isVaultUnlocked = true; document.getElementById('vaultAuthBox').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; calculateVaultData(); }
     }
 
-    // 🔄 الحساب الرياضي الدقيق للثلاث خانات فقط
     function calculateVaultData() {
         let totalRequired = 0; 
         let totalRemaining = 0; 
         let totalPaid = 0;
 
         subscribers.forEach(sub => {
-            // 1. الإجمالي لكل مشترك (باقته + ديونه)
             totalRequired += (sub.packagePrice + sub.previousDebt);
-            
-            // 2. إجمالي المتبقي الفعلي
             totalRemaining += getSubscriberStatus(sub).remaining;
-
-            // 3. إجمالي المدفوع الفعلي
             totalPaid += sub.currentPaid;
         });
 
