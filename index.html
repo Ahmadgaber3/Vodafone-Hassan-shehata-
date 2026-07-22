@@ -226,7 +226,7 @@
                     <button class="eye-btn" onclick="toggleNumbersVisibility()">👁️ كشف / إخفاء الحسابات</button>
                     <div class="vault-grid">
                         <div class="vault-card-item" style="border-right-color: #2563eb;">
-                            <span>📊 الإجمالي العام المطلوب (حساب الباقات + الديون القديمة)</span>
+                            <span>📊 الإجمالي العام المستحق (كل المطلوب الفعلي)</span>
                             <strong id="v-total-required">****</strong>
                         </div>
                         <div class="vault-card-item" style="border-right-color: #dc2626;">
@@ -334,6 +334,8 @@
 </div>
 
 <script>
+    /* 🚀 نظام التحديث التلقائي الفوري - غيّر رقم الإصدار ده لما تنزل أي كود جديد */
+    const APP_VERSION = "1.0.2"; 
     const ADMIN_PIN = "5566"; 
 
     const defaultSubscribers = [
@@ -393,7 +395,27 @@
     let helperDebtors = [];
     let helperIndex = 0;
 
+    function checkAppVersion() {
+        const currentVersion = localStorage.getItem('app_sys_version');
+        if (currentVersion !== APP_VERSION) {
+            localStorage.setItem('app_sys_version', APP_VERSION);
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    for (let name of names) caches.delete(name);
+                });
+            }
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) registration.unregister();
+                });
+            }
+            window.location.reload(true);
+        }
+    }
+
     function initData() {
+        checkAppVersion();
+
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').then(() => console.log("PWA Active!"));
         }
@@ -477,8 +499,8 @@
     }
 
     function getSubscriberStatus(sub) {
-        const totalRequired = sub.packagePrice + sub.previousDebt;
-        const remaining = totalRequired - sub.currentPaid;
+        const totalRequired = (sub.packagePrice || 0) + (sub.previousDebt || 0);
+        const remaining = totalRequired - (sub.currentPaid || 0);
         let status = 'unpaid'; let statusText = 'لم يدفع';
         if (sub.currentPaid >= totalRequired) { status = 'fully-paid'; statusText = 'كامل الدفع'; }
         else if (sub.currentPaid > 0 && sub.currentPaid < totalRequired) { status = 'partial-paid'; statusText = 'دفع جزئي'; }
@@ -499,7 +521,6 @@
         updateHelperUI();
     }
 
-    /* ✏️ رسالة التذكير السريع: "بنفكرك ان عليك [المبلغ] ج" فقط */
     function updateHelperUI() {
         if (helperIndex >= helperDebtors.length) {
             document.getElementById('helperReminderBar').style.display = 'none';
@@ -510,7 +531,6 @@
         const { remaining } = getSubscriberStatus(sub);
         document.getElementById('helperText').innerHTML = `🔄 عميل [${helperIndex + 1}/${helperDebtors.length}]: <b>${sub.name}</b> (${remaining} ج)`;
         
-        // النص المطلوب تماماً وبدون أسماء
         const waMessage = `بنفكرك ان عليك (${remaining}) ج`;
         
         let cleanPhone = sub.phone.toString();
@@ -578,7 +598,6 @@
         saveData(); render();
     }
 
-    /* ✏️ زر التذكير اليدوي: "بنفكرك ان عليك [المبلغ] ج" فقط */
     function openSubscriberModal(id) {
         activeSubId = id; const sub = subscribers.find(s => s.id === id); if(!sub) return;
         const { remaining } = getSubscriberStatus(sub); let cleanPhone = sub.phone.toString();
@@ -590,7 +609,6 @@
         document.getElementById('m-remaining').innerText = remaining + " ج";
         document.getElementById('m-link-call').setAttribute('href', `tel:${cleanPhone}`);
         
-        // النص المطلوبة للزر اليدوي
         const customWaMessage = `بنفكرك ان عليك (${remaining}) ج`;
         document.getElementById('m-link-wa').setAttribute('href', `https://wa.me/2${cleanPhone}?text=${encodeURIComponent(customWaMessage)}`);
         
@@ -602,7 +620,6 @@
     function closeModal() { document.getElementById('detailsModal').style.display = 'none'; document.body.classList.remove('modal-open'); }
     function closeModalOutside(e) { if(e.target.id === 'detailsModal') closeModal(); }
 
-    /* ✏️ عند الدفع الفوري الصافي بدون رسوم أو زيادات */
     function submitModalPayment(id) {
         const input = document.getElementById('m-pay-input'); const amount = parseFloat(input.value);
         if (isNaN(amount) || amount <= 0) return;
@@ -617,7 +634,6 @@
                 return;
             }
 
-            // النص المفصل فقط عند تأكيد استلام دفعة جديدة
             const waMessage = `• تم دفع الان: (${amount}) ج\n• المتبقي: (${remaining}) ج`;
 
             let cleanPhone = sub.phone.toString();
@@ -708,16 +724,19 @@
         if(document.getElementById('vaultPassword').value === "1234") { isVaultUnlocked = true; document.getElementById('vaultAuthBox').style.display = 'none'; document.getElementById('vaultContent').style.display = 'block'; calculateVaultData(); }
     }
 
+    /* 🛡️ إعادة هيكلة الخزنة لتجنب التكرار والازدواج الحسابي */
     function calculateVaultData() {
-        let totalRequired = 0; 
-        let totalRemaining = 0; 
         let totalPaid = 0;
+        let totalRemaining = 0;
 
         subscribers.forEach(sub => {
-            totalRequired += (sub.packagePrice + sub.previousDebt);
-            totalRemaining += getSubscriberStatus(sub).remaining;
-            totalPaid += sub.currentPaid;
+            const { remaining } = getSubscriberStatus(sub);
+            totalPaid += (sub.currentPaid || 0);
+            totalRemaining += remaining;
         });
+
+        // الإجمالي المستحق الحقيقي = كل اللي اتدفع + كل اللي فاضل
+        const totalRequired = totalPaid + totalRemaining;
 
         if(isVaultUnlocked && showNumbers) {
             document.getElementById('v-total-required').innerText = totalRequired + " ج";
