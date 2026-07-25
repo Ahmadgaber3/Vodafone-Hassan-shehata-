@@ -120,10 +120,10 @@
         .payment-input { flex: 1; padding: 6px 10px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text-main); border-radius: 8px; outline: none; font-size: 11px; }
         .submit-pay-btn { background: #2563eb; color: white; border: none; padding: 4px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 11px; }
 
-        .history-box { background: var(--bg); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; max-height: 80px; overflow-y: auto; }
+        .history-box { background: var(--bg); padding: 6px 8px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; max-height: 120px; overflow-y: auto; }
         .history-title { font-weight: 700; color: var(--text-sub); margin-bottom: 4px; }
-        .timeline-item { position: relative; padding-right: 12px; margin-bottom: 4px; color: var(--text-main); font-size: 10px; }
-        .timeline-item::before { content: ''; position: absolute; right: 2px; top: 4px; width: 5px; height: 5px; background: var(--text-sub); border-radius: 50%; }
+        .timeline-item { position: relative; padding-right: 12px; margin-bottom: 6px; color: var(--text-main); font-size: 11px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; }
+        .timeline-item::before { content: ''; position: absolute; right: 2px; top: 6px; width: 5px; height: 5px; background: #2563eb; border-radius: 50%; }
 
         .vault-view { background: #0f172a; color: white; padding: 14px; border-radius: var(--radius); }
         .vault-auth { display: flex; gap: 6px; justify-content: center; padding: 20px 0; }
@@ -131,7 +131,8 @@
         .vault-btn { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; }
         .vault-content { display: none; }
         .vault-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-        .vault-card-item { background: #1e293b; padding: 14px; border-radius: 10px; border-right: 5px solid #38bdf8; }
+        .vault-card-item { background: #1e293b; padding: 14px; border-radius: 10px; border-right: 5px solid #38bdf8; cursor: pointer; transition: background 0.2s; }
+        .vault-card-item:hover { background: #334155; }
         .vault-card-item span { display: block; font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
         .vault-card-item strong { font-size: 18px; color: #38bdf8; }
         
@@ -226,18 +227,30 @@
                 <div class="vault-content" id="vaultContent">
                     <button class="eye-btn" onclick="toggleNumbersVisibility()">👁️ كشف / إخفاء الحسابات</button>
                     <div class="vault-grid">
-                        <div class="vault-card-item" style="border-right-color: #16a34a;">
-                            <span>💰 إجمالي دخل جيبك (المبالغ المسددة بالفعل)</span>
+                        <div class="vault-card-item" style="border-right-color: #16a34a;" onclick="openPaymentsLogModal()">
+                            <span>💰 إجمالي دخل جيبك (اضغط لعرض سجل الدفع بالساعة) 🔍</span>
                             <strong id="v-total-paid" style="color:#4ade80;">****</strong>
                         </div>
-                        <div class="vault-card-item" style="border-right-color: #dc2626;">
-                            <span>🔴 إجمالي المتبقي للناس (الديون والمتبقيات)</span>
+                        <div class="vault-card-item" style="border-right-color: #dc2626;" onclick="openDebtorsLogModal()">
+                            <span>🔴 إجمالي المتبقي للناس (اضغط لمعرفة من عليه متبقي) 🔍</span>
                             <strong id="v-total-remaining" style="color:#f87171;">****</strong>
                         </div>
                     </div>
                     <button class="reset-vault-btn" onclick="resetVaultOnly()">🗑️ تصفير عداد الخزنة فقط</button>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="vaultLogsModal" onclick="closeVaultLogsModalOutside(event)">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="v-logs-title">تفاصيل الخزنة</h2>
+            <button class="close-modal-btn" onclick="closeVaultLogsModal()">✕</button>
+        </div>
+        <div class="history-box" style="max-height: 250px;">
+            <div id="v-logs-content"></div>
         </div>
     </div>
 </div>
@@ -332,7 +345,7 @@
 </div>
 
 <script>
-    const APP_VERSION = "1.0.5"; 
+    const APP_VERSION = "1.0.6"; 
     const ADMIN_PIN = "5566"; 
 
     const defaultSubscribers = [
@@ -618,7 +631,16 @@
         if (isNaN(amount) || amount <= 0) return;
         const sub = subscribers.find(s => s.id === id);
         if (sub) {
-            sub.currentPaid += amount; sub.history.push(`دفع: ${amount} ج`); saveData(); 
+            sub.currentPaid += amount; 
+            
+            // إضافة التاريخ والوقت بالضبط بالساعة
+            const now = new Date();
+            const timeFormatted = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: true });
+            const dateFormatted = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+            const timeStampStr = `[${dateFormatted} - ${timeFormatted}]`;
+            
+            sub.history.push(`دفع: ${amount} ج ${timeStampStr}`); 
+            saveData(); 
             const { remaining } = getSubscriberStatus(sub);
 
             if (sub.disableWA) {
@@ -743,6 +765,74 @@
             document.getElementById('v-total-paid').innerText = actualPaidInPocket + " ج";
             document.getElementById('v-total-remaining').innerText = totalRemainingOnPeople + " ج";
         }
+    }
+
+    /* 🔍 فتح سجل المدفوعات التفصيلي بالساعة والدقيقة */
+    function openPaymentsLogModal() {
+        if (!showNumbers) { alert("يرجى ضغط كشف الحسابات أولاً 👁️"); return; }
+        document.getElementById('v-logs-title').innerText = "📜 سجل المدفوعات اللي دخلت جيبك";
+        const container = document.getElementById('v-logs-content');
+        container.innerHTML = "";
+
+        let payments = [];
+        subscribers.forEach(sub => {
+            if (sub.history && sub.history.length > 0) {
+                sub.history.forEach(h => {
+                    if (h.includes("دفع:") || h.includes("سداد")) {
+                        payments.push({ name: sub.name, detail: h });
+                    }
+                });
+            }
+        });
+
+        if (payments.length === 0) {
+            container.innerHTML = "<div style='text-align:center;'>لا توجد عمليات دفع مسجلة حتى الآن.</div>";
+        } else {
+            container.innerHTML = payments.map(p => `
+                <div class="timeline-item">
+                    <b>${p.name}:</b> ${p.detail}
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('vaultLogsModal').style.display = 'flex';
+    }
+
+    /* 🔍 فتح سجل العملاء اللي عليهم متبقي فلوس */
+    function openDebtorsLogModal() {
+        if (!showNumbers) { alert("يرجى ضغط كشف الحسابات أولاً 👁️"); return; }
+        document.getElementById('v-logs-title').innerText = "🔴 قائمة العملاء اللي عليهم متبقي";
+        const container = document.getElementById('v-logs-content');
+        container.innerHTML = "";
+
+        let debtors = [];
+        subscribers.forEach(sub => {
+            const { remaining } = getSubscriberStatus(sub);
+            if (remaining > 0) {
+                debtors.push({ name: sub.name, phone: sub.phone, remaining: remaining });
+            }
+        });
+
+        if (debtors.length === 0) {
+            container.innerHTML = "<div style='text-align:center;'>🎉 ممتاز! لا يوجد أي عميل عليه ديون حالياً.</div>";
+        } else {
+            container.innerHTML = debtors.map(d => `
+                <div class="timeline-item" style="display:flex; justify-style:space-between; justify-content:space-between; align-items:center;">
+                    <span><b>${d.name}</b> (${d.phone})</span>
+                    <strong style="color:#dc2626; font-size:12px;">باقي: ${d.remaining} ج</strong>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('vaultLogsModal').style.display = 'flex';
+    }
+
+    function closeVaultLogsModal() {
+        document.getElementById('vaultLogsModal').style.display = 'none';
+    }
+
+    function closeVaultLogsModalOutside(e) {
+        if(e.target.id === 'vaultLogsModal') closeVaultLogsModal();
     }
 
     /* 🗑️ تصفير عداد الخزنة فقط بدون المساس بكروت المشتركين إطلاقاً */
